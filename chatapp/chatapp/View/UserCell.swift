@@ -20,7 +20,7 @@ class UserCell:UITableViewCell{
                 let dateFormat = DateFormatter()
                 dateFormat.dateFormat = "dd/MM/yyyy"
                 let timeFormat = DateFormatter()
-                timeFormat.dateFormat = "hh:mm:ss"
+                timeFormat.dateFormat = "HH:mm"
                 
                 let curTimeStamp: NSNumber? = NSDate().timeIntervalSince1970 as NSNumber
                 let curTimeStampDate = NSDate(timeIntervalSince1970: (curTimeStamp?.doubleValue)!)
@@ -37,7 +37,7 @@ class UserCell:UITableViewCell{
         }
     }
     
-    private func setupNameAndProfileImage(){
+    func setupNameAndProfileImage(){
              
         if let id = message?.chatPartnerId() {
             let ref = Database.database().reference().child("users").child(id)
@@ -50,15 +50,30 @@ class UserCell:UITableViewCell{
                 }
             })
         }
+        
+        if let messText = message?.text{
+            if message?.fromID == Auth.auth().currentUser?.uid {
+                self.detailTextLabel?.text = "You: \(messText)"
+            }else{
+                self.detailTextLabel?.text = messText
+            }
+        }else{
+            if message?.fromID  == Auth.auth().currentUser?.uid {
+                self.detailTextLabel?.text = "You: [MEDIA]]"
+            }else{
+                self.detailTextLabel?.text =  "[MEDIA]"
+            }
+        }
+        
         self.detailTextLabel?.font = UIFont.systemFont(ofSize: 14)
         self.detailTextLabel?.textColor = UIColor.darkGray
-        self.detailTextLabel?.text = message?.text
+
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         textLabel?.frame = CGRect(x: 64, y: (textLabel?.frame.origin.y)! - 2, width: (textLabel?.frame.width)!, height: (textLabel?.frame.height)!)
-        detailTextLabel?.frame = CGRect(x: 64, y: (detailTextLabel?.frame.origin.y)! + 2, width: (detailTextLabel?.frame.width)!, height: (detailTextLabel?.frame.height)!)
+        detailTextLabel?.frame = CGRect(x: 64, y: (detailTextLabel?.frame.origin.y)! + 2, width: (self.frame.width)-150, height: (detailTextLabel?.frame.height)!)
         
     }
     
@@ -89,8 +104,17 @@ class UserCell:UITableViewCell{
         return timeLabel
     }()
     
+    var baseTableController: BaseTableViewController?
+    
+    @objc func handle(){
+        baseTableController?.showActionSheet(cell: self)
+    }
+    
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
+        let lpg = UILongPressGestureRecognizer(target: self, action: #selector(handle))
+        lpg.minimumPressDuration = 1
+        self.addGestureRecognizer(lpg)
         
         addSubview(profileImageView)
         addSubview(dateLabel)
@@ -103,14 +127,14 @@ class UserCell:UITableViewCell{
         profileImageView.heightAnchor.constraint(equalToConstant: 48).isActive = true
         
         //dateLabel constrains
-        dateLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -10).isActive = true
-        dateLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 10).isActive = true
-        dateLabel.heightAnchor.constraint(equalTo: (self.textLabel?.heightAnchor)!).isActive = true
+        dateLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8).isActive = true
+        dateLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 20).isActive = true
+        //dateLabel.heightAnchor.constraint(equalTo: (self.textLabel?.heightAnchor)!).isActive = true
         
         //timeLabel constrains
-        timeLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant : -10).isActive = true
+        timeLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant : -8).isActive = true
         timeLabel.topAnchor.constraint(equalTo: dateLabel.bottomAnchor).isActive = true
-        timeLabel.heightAnchor.constraint(equalTo: (self.textLabel?.heightAnchor)!).isActive = true
+        //timeLabel.heightAnchor.constraint(equalTo: (self.textLabel?.heightAnchor)!).isActive = true
         
     }
     

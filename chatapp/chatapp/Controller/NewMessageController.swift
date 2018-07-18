@@ -28,12 +28,17 @@ class NewMessageController: UITableViewController {
     }
     
     func fetchUser(){
+        let myId = Auth.auth().currentUser?.uid
+        
+        
         Database.database().reference().child("users").queryOrdered(byChild: "name").observe(.childAdded, with: { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject]{
                 let user = User(values: dictionary)
                 user.id = snapshot.key
-
-                self.users.append(user)
+                
+                if myId != user.id{
+                    self.users.append(user)
+                }
                 
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -55,7 +60,7 @@ class NewMessageController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! UserCell
         let user = users[indexPath.row]
         cell.textLabel?.text = user.name
-        cell.detailTextLabel?.text = user.email
+        //cell.detailTextLabel?.text = user.email
 
         if let profileImageUrl = user.profileImageUrl{
             cell.profileImageView.loadImageUsingCacheWithUrlString(urlString: profileImageUrl)
