@@ -18,12 +18,17 @@ class CustomTabBarController: UITabBarController {
         recentMessagesNavController.tabBarItem.image = UIImage(named: "ic_conversation")
         recentMessagesNavController.tabBarItem.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -9, right: 0)
         
-        let groupMessagesController = GroupMessagesController()
-        let groupMessagesNavController = UINavigationController(rootViewController: groupMessagesController)
-        groupMessagesNavController.tabBarItem.image = UIImage(named: "people")
-        groupMessagesNavController.tabBarItem.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -9, right: 0)
+        let groupsMessagesController = GroupsMessagesController()
+        let groupsMessagesNavController = UINavigationController(rootViewController: groupsMessagesController)
+        groupsMessagesNavController.tabBarItem.image = UIImage(named: "people")
+        groupsMessagesNavController.tabBarItem.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -9, right: 0)
         
-        viewControllers = [recentMessagesNavController,groupMessagesNavController]
+        let friendsController = FriendsViewController()
+        let friendsNavController = UINavigationController(rootViewController: friendsController)
+        friendsNavController.tabBarItem.image = UIImage(named: "ic_friends")
+        friendsNavController.tabBarItem.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -9, right: 0)
+        
+        viewControllers = [recentMessagesNavController, groupsMessagesNavController, friendsNavController]
     }
 
 }

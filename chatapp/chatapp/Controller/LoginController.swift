@@ -13,6 +13,7 @@ class LoginController: UIViewController, UITextFieldDelegate {
     
     var messageController: BaseTableViewController?
     let actionOk = UIAlertAction(title: "Ok", style: .default, handler: nil)
+    let timeShakeAnim = 0.2
     
     lazy var alert : UIAlertController = {
         let alert = UIAlertController(title: "Sign Up Fail", message: nil, preferredStyle: .alert)

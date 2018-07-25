@@ -23,9 +23,6 @@ class MessagesController: BaseTableViewController{
 
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        fetchUserAndSetupNavBarTitle()
-    }
     
     func observeUserMessages(){
         messages.removeAll()

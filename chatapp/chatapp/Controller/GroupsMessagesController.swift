@@ -9,13 +9,13 @@
 import UIKit
 import Firebase
 
-class GroupMessagesController: BaseTableViewController {
-
+class GroupsMessagesController: BaseTableViewController {
+    
     var groups = [Group]()
     var groupDictionary = [String: Group]()
     var groupMessagesDictionary = [String : Message]()
     let cellId2 = "cellGroup"
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,9 +24,6 @@ class GroupMessagesController: BaseTableViewController {
         observeGroups()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        fetchUserAndSetupNavBarTitle()
-    }
     
     func observeGroups(){
         groups.removeAll()
@@ -47,12 +44,12 @@ class GroupMessagesController: BaseTableViewController {
                 if let dictionary = snapshot.value as? [String: AnyObject]{
                     let group = Group(values: dictionary)
                     group.id = snapshot.key
-
+                    
                     self.groupDictionary[group.id!] = group
                     self.attemptReloadOfTable()
                     DispatchQueue.main.async {
                         self.tableView.reloadData()
-       
+                        
                     }
                 }
             }, withCancel: nil)
@@ -73,10 +70,10 @@ class GroupMessagesController: BaseTableViewController {
     
     
     func observeGroupMessages(groupId: String ){
-
+        
         let dbRef = Database.database().reference().child("group-messages").child(groupId)
         dbRef.observe(.childAdded, with: { (snapshot) in
-
+            
             let messageId = snapshot.key
             self.fetchGroupMessageWithMessageId(messageId: messageId)
             
@@ -89,12 +86,12 @@ class GroupMessagesController: BaseTableViewController {
         messagesRef.observeSingleEvent(of: .value, with: { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject]{
                 let message = Message(values: dictionary)
-
+                
                 if let chatMemberId = message.toID {
                     self.groupMessagesDictionary[chatMemberId] = message
-
+                    
                 }
-
+                
                 self.attemptReloadOfTable()
             }
         }, withCancel: nil)
@@ -107,7 +104,7 @@ class GroupMessagesController: BaseTableViewController {
         self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
         //print("schedule a table raload in 0.1 sec")
     }
-
+    
     @objc func handleReloadTable(){
         self.groups = Array(self.groupDictionary.values)
         if(groups.count > 1){
@@ -123,14 +120,14 @@ class GroupMessagesController: BaseTableViewController {
                 return false
             }
         }
-
+        
         DispatchQueue.main.async {
             print("reload table")
-
+            
             self.tableView.reloadData()
         }
     }
-
+    
     lazy var groupImageView: UIImageView =  {
         let groupImageView = UIImageView()
         groupImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -140,7 +137,7 @@ class GroupMessagesController: BaseTableViewController {
         groupImageView.layer.cornerRadius = 50
         groupImageView.layer.masksToBounds = true
         groupImageView.layer.borderWidth = 1
-        groupImageView.layer.borderColor = UIColor.black.cgColor
+        groupImageView.layer.borderColor = UIColor.lightGray.cgColor
         groupImageView.isUserInteractionEnabled = true
         groupImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleSelectProfileImageView)))
         return groupImageView
@@ -228,16 +225,14 @@ class GroupMessagesController: BaseTableViewController {
         btnCancel.leftAnchor.constraint(equalTo: separateView.rightAnchor).isActive = true
         btnCancel.widthAnchor.constraint(equalTo: createGroupView.widthAnchor, multiplier: 1/2).isActive = true
         btnCancel.heightAnchor.constraint(equalToConstant: 40).isActive = true
-
+        
         return createGroupView
     }()
     
     lazy var blackView : UIView = {
         let blView  = UIView()
         blView.backgroundColor = UIColor(white: 0, alpha: 0.5)
-        
-        blView.alpha = 0
-        
+        blView.frame = (window?.frame)!
         blView.addSubview(createGroupView)
         
         self.createGroupView.centerXAnchor.constraint(equalTo: blView.centerXAnchor).isActive = true
@@ -250,18 +245,22 @@ class GroupMessagesController: BaseTableViewController {
     
     
     @objc func handleCancelCreateGroup(){
-        UIView.animate(withDuration: 0.3) {
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.blackView.transform = CGAffineTransform.init(scaleX: 1.3, y: 1.3)
             self.blackView.alpha = 0
+            
+        }) { (finish) in
             self.blackView.removeFromSuperview()
             self.groupImageView.image = #imageLiteral(resourceName: "groups")
             self.nameGroupTextField.text = nil
-            self.view.layoutIfNeeded()
         }
+        
     }
     let window = UIApplication.shared.keyWindow
     
     @objc func handleCreateGroup(){
- 
+        
         guard let uid = Auth.auth().currentUser?.uid,!(nameGroupTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)!
             else {
                 createGroupView.shake(count: 5, for: 0.3, withTranslation: 5)
@@ -305,7 +304,7 @@ class GroupMessagesController: BaseTableViewController {
     
     func updateUserGroupAndGroupMember(childId: String, idGroup: String, nameGroup: String){
         let dbRef = Database.database().reference()
-
+        
         dbRef.child("user-groups").child(childId).updateChildValues([idGroup: auth])
         dbRef.child("group-members").child(idGroup).updateChildValues([childId: auth])
         sendMessageWithProperties(childId: childId, idGroup: idGroup, nameGroup: nameGroup)
@@ -335,22 +334,24 @@ class GroupMessagesController: BaseTableViewController {
     }
     
     @objc func handleNewGroup(){
-
-        blackView.frame = (window?.frame)!
         
         window?.addSubview(blackView)
+        blackView.transform = CGAffineTransform.init(scaleX: 1.3, y: 1.3)
+        
+        blackView.alpha = 0
         UIView.animate(withDuration: 0.3) {
             self.blackView.alpha = 1
             
+            self.blackView.transform = CGAffineTransform.identity
             self.view.layoutIfNeeded()
         }
         self.nameGroupTextField.becomeFirstResponder()
-      
+        
     }
-
+    
     // MARK: - Table view data source
-
-
+    
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return groups.count
     }
@@ -366,10 +367,10 @@ class GroupMessagesController: BaseTableViewController {
         
         return cell
     }
-
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let group =  groups[indexPath.row]
-
+        
         self.showChatControllerForUser(group: group)
         
     }
@@ -380,11 +381,13 @@ class GroupMessagesController: BaseTableViewController {
         groupChatLogController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(groupChatLogController, animated: true)
     }
-
+    
+    var indexGroupChange: Int?
+    
     @objc override func showActionSheet(cell: UserCell) {
         let indexTapped = tableView.indexPath(for: cell)
         let group = groups[indexTapped!.row]
-        
+        indexGroupChange = indexTapped!.row
         guard let uid = Auth.auth().currentUser?.uid
             else{
                 return
@@ -392,10 +395,7 @@ class GroupMessagesController: BaseTableViewController {
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let actionDeleteMess = UIAlertAction(title: "Delete Messages", style: .default) { (alert) in
-            
-        }
-        alert.addAction(actionDeleteMess)
+        
         
         if group.hostId != uid {
             let actionLeaveGroup = UIAlertAction(title: "Leave This Group", style: .destructive) { (alert) in
@@ -403,18 +403,76 @@ class GroupMessagesController: BaseTableViewController {
             }
             alert.addAction(actionLeaveGroup)
         }else{
+            let actionChangeImage = UIAlertAction(title: "Change Group Image", style: .default) { (alert) in
+                self.changeGroupImage()
+            }
+            alert.addAction(actionChangeImage)
+            
             let actionDeleteGroup = UIAlertAction(title: "Delete This Group", style: .destructive) { (alert) in
                 self.confirmDeleteGroup(group: group)
             }
             alert.addAction(actionDeleteGroup)
+            
         }
-       
+        
         let actionCancel = UIAlertAction(title: "Cancel", style: .cancel) { (alert) in
             
         }
-
+        
         alert.addAction(actionCancel)
         self.present(alert,animated: true)
+    }
+    
+    
+    func changeGroupImage(){
+        changeGroupImageFlag = true
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        
+        let actionGallery = UIAlertAction(title: "Open Gallery", style: .default) { (alert) in
+            self.openGallery()
+        }
+        let actionCamera = UIAlertAction(title: "Take a picture", style: .default) { (alert) in
+            self.openCamera()
+        }
+        
+        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        alert.addAction(actionGallery)
+        alert.addAction(actionCamera)
+        alert.addAction(actionCancel)
+        self.present(alert,animated: true)
+    }
+    
+    var imageGalleryPickerController = UIImagePickerController()
+    var imageCameraPickerController = UIImagePickerController()
+    
+    func openCamera() {
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera) {
+            imageCameraPickerController.delegate = self
+            imageCameraPickerController.sourceType = UIImagePickerControllerSourceType.camera
+            imageCameraPickerController.allowsEditing = true
+            
+            self.present(self.imageCameraPickerController, animated: true, completion: nil)
+        }
+        else {
+            let alertWarning = UIAlertController(title:"Warning", message: "You don't have camera", preferredStyle: .alert)
+            let actionOk = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+            alertWarning.addAction(actionOk)
+            
+            self.present(alertWarning, animated: true, completion: nil)
+        }
+    }
+    
+    var changeGroupImageFlag = false
+    
+    func openGallery(){
+        
+        imageGalleryPickerController.delegate = self
+        imageGalleryPickerController.allowsEditing = true
+        
+        self.present(imageGalleryPickerController, animated: true, completion: nil)
+        
+   
     }
     
     func leaveGroup(group: Group){
@@ -451,7 +509,7 @@ class GroupMessagesController: BaseTableViewController {
     }
     
     func deleteGroup(group: Group){
-   
+        
         let sv = UIViewController.displaySpinner(onView: window!)
         
         Database.database().reference().child("group-members").child(group.id!).observe(.childAdded, with: { (snapshot) in
@@ -483,11 +541,11 @@ class GroupMessagesController: BaseTableViewController {
         }
         
     }
- 
-
+    
+    
 }
 
-extension GroupMessagesController: UINavigationControllerDelegate, UIImagePickerControllerDelegate{
+extension GroupsMessagesController: UINavigationControllerDelegate, UIImagePickerControllerDelegate{
     @objc func handleSelectProfileImageView(){
         let picker = UIImagePickerController()
         picker.delegate = self
@@ -500,6 +558,17 @@ extension GroupMessagesController: UINavigationControllerDelegate, UIImagePicker
     
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        handleImageSelectedForInfo(info: info)
+        
+        self.dismiss(animated: true) {
+            self.blackView.isHidden = false
+        }
+    }
+    
+    
+    
+    func handleImageSelectedForInfo(info: [String: Any]){
         var selectedImageFromPicker: UIImage?
         
         if let editedImage = info["UIImagePickerControllerEditedImage"] as? UIImage{
@@ -507,12 +576,49 @@ extension GroupMessagesController: UINavigationControllerDelegate, UIImagePicker
         }
         
         if let selectedImage = selectedImageFromPicker{
-            groupImageView.image = selectedImage
-            
-        }
-        
-        self.dismiss(animated: true) {
-            self.blackView.isHidden = false
+            if changeGroupImageFlag {
+                let sv = UIViewController.displaySpinner(onView: view)
+                // Create a reference to the file to delete
+                let storageRef = Storage.storage().reference().child("groups_images").child(groups[indexGroupChange!].name!+".jpg")
+
+                // Delete the file
+                storageRef.delete { error in
+                    if error != nil {
+                        print(error!)
+                        return
+                    }
+                    print("File deleted successfully")
+
+                    if let data = UIImageJPEGRepresentation(selectedImage, 0.1){
+                        storageRef.putData(data, metadata: nil, completion: { (metadata, error) in
+
+                            if error != nil{
+                                print("Fail to upload image", error!)
+                                return
+                            }
+
+                            let groupReference = Database.database().reference().child("groups").child(self.groups[self.indexGroupChange!].id!)
+
+                            if let imageUrl = metadata?.downloadURL()?.absoluteString{
+                                groupReference.updateChildValues(["groupImageUrl" : imageUrl], withCompletionBlock: { (err, ref) in
+                                    if err != nil{
+                                        print(err!)
+                                        return
+                                    }
+                                    self.groups[self.indexGroupChange!].groupImageUrl = imageUrl
+                                    UIViewController.removeSpinner(spinner: sv)
+                                    self.changeGroupImageFlag = false
+                                    self.indexGroupChange = nil
+                                    self.attemptReloadOfTable()
+                                })
+                            }
+
+                        })
+                    }
+                }
+            }else{
+                groupImageView.image = selectedImage
+            }
         }
     }
     
@@ -520,9 +626,11 @@ extension GroupMessagesController: UINavigationControllerDelegate, UIImagePicker
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         self.dismiss(animated: true) {
             self.blackView.isHidden = false
+            self.changeGroupImageFlag = false
+            self.indexGroupChange = nil
         }
     }
     
-   
+    
 }
 

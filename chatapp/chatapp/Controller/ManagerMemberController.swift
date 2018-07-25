@@ -24,8 +24,7 @@ class ManagerMemberController: UITableViewController,UISearchBarDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        searchBar.delegate = self
+
         self.tableView.register(MemberCell.self, forCellReuseIdentifier: cellId)
 
         setupNavigationBar()
@@ -34,7 +33,6 @@ class ManagerMemberController: UITableViewController,UISearchBarDelegate {
     
     func setupNavigationBar(){
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_drop"), style: .plain, target: self, action: #selector(handleCancel))
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "search"), style: .plain, target: self, action: #selector(handleSearch))
 
         
         memberFriendsSegmentControl.addTarget(self, action: #selector(handleMemberFriendsSegmentControl), for: .valueChanged)
@@ -49,82 +47,7 @@ class ManagerMemberController: UITableViewController,UISearchBarDelegate {
         return segmentedControl;
     }()
     
-    let searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        searchBar.barStyle = UIBarStyle.blackTranslucent
-        searchBar.sizeToFit()
-        searchBar.showsCancelButton = true
-        searchBar.placeholder = "Search by name"
 
-        
-        return searchBar
-    }()
-    
-    // called whenever text is changed.
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
-//        if allFavorSegmentedControl.selectedSegmentIndex == 0{
-//            guard !searchText.isEmpty else{
-//                coinCharts = searchCoinCharts
-//                tableView.reloadData()
-//                return
-//            }
-//            coinCharts = searchCoinCharts.filter({ (coinChart) -> Bool in
-//                coinChart.name.lowercased().contains(searchText.lowercased())
-//            })
-//
-//        }else if  allFavorSegmentedControl.selectedSegmentIndex == 1{
-//            var coinFavorites = [CoinChart]()
-//            for favorite in (self.user?.favorites)!{
-//                for coinChart in self.searchCoinCharts{
-//                    if favorite == coinChart.symbol{
-//                        coinFavorites.append(coinChart)
-//                    }
-//                }
-//            }
-//            guard !searchText.isEmpty else{
-//                self.coinCharts = coinFavorites
-//                tableView.reloadData()
-//                return
-//            }
-//            coinCharts = coinFavorites.filter({ (coinChart) -> Bool in
-//                coinChart.name.lowercased().contains(searchText.lowercased())
-//            })
-        
-//        }
-//        tableView.reloadData()
-    }
-    
-    // called when cancel button is clicked
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-
-        setupNavigationBar()
-//        if allFavorSegmentedControl.selectedSegmentIndex == 0 {
-//            self.coinCharts = self.searchCoinCharts
-//        }else if allFavorSegmentedControl.selectedSegmentIndex == 1{
-//            var coinFavorites = [CoinChart]()
-//            for favorite in (self.user?.favorites)!{
-//                for coinChart in self.searchCoinCharts{
-//                    if favorite == coinChart.symbol{
-//                        coinFavorites.append(coinChart)
-//                    }
-//                }
-//            }
-//            self.coinCharts = coinFavorites
-//        }
-        
-//       tableView.reloadData()
-    }
-    
-    @objc func handleSearch(){
-        navigationItem.rightBarButtonItem = nil
-        navigationItem.leftBarButtonItem = nil
-        
-        navigationItem.titleView = nil
-        navigationItem.leftBarButtonItem =  UIBarButtonItem(customView: searchBar)
-        searchBar.becomeFirstResponder();
-        searchBar.text = ""
-    }
     
     @objc func handleMemberFriendsSegmentControl(){
         tableView.reloadData()

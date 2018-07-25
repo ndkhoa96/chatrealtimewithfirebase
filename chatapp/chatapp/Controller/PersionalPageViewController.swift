@@ -9,9 +9,10 @@
 import UIKit
 import Firebase
 
-class PersionalPageViewController : UICollectionViewController, UICollectionViewDelegateFlowLayout,UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate  {
+class PersionalPageViewController : UICollectionViewController, UICollectionViewDelegateFlowLayout,UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UIPickerViewDataSource, UIPickerViewDelegate  {
     
     var user : User?
+    var photos = [UIImage]()
     
     let cellInforId = "CellInforId"
     let cellPhotosId = "CellPhotosId"
@@ -31,13 +32,20 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.backgroundColor = .clear
-        tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        self.navigationController?.navigationBar.addGestureRecognizer(tapGesture!)
+
         self.navigationItem.hidesBackButton = true
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named:"ic_back"), style: .plain, target: self, action: #selector(handleBack))
         self.navigationItem.leftBarButtonItem?.imageInsets = UIEdgeInsets(top: 0, left: -12, bottom: 0, right: 12)
         
+        
+        if user?.id == Auth.auth().currentUser?.uid {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named:"ic_add_photo"), style: .plain, target: self, action: #selector(handleBack))
+            self.navigationItem.rightBarButtonItem?.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -6)
+            btnMore.isHidden = false
+        }
         collectionView?.contentInset = UIEdgeInsets(top: -70, left: 0, bottom: 30, right: 0)
+        genderPicker.delegate = self
+        genderPicker.dataSource = self
    
     }
     var heightItem = 60
@@ -89,7 +97,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         btn.setImage(tintedImage, for: .normal)
         btn.tintColor = Theme.shared.whiteColor
         btn.addTarget(self, action: #selector(handleMore), for: .touchUpInside)
-        
+        btn.isHidden = true
         return btn
        
     }()
@@ -160,8 +168,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         imageGalleryPickerController.allowsEditing = true
         
         self.present(imageGalleryPickerController, animated: true, completion: nil)
-        
-        
+         
         
     }
     
@@ -173,8 +180,6 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         
         
     }
-    
-    var btv: BaseTableViewController?
     
     var changeProfileImageFlag = false
     var changeBackgroundImageFlag = false
@@ -220,7 +225,6 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                                         return
                                     }
                                     self.user?.profileImageUrl = imageUrl
-                                    //self.btv?.fetchUserAndSetupNavBarTitle()
                                     UIViewController.removeSpinner(spinner: sv)
                                     
                                     DispatchQueue.main.async {
@@ -331,7 +335,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
     @objc func handleZoomOutTap(tapGesture: UITapGestureRecognizer){
         navigationController?.navigationBar.isHidden = false
         if let zoomOutImageView = tapGesture.view{
-            zoomOutImageView.layer.cornerRadius = 16
+            zoomOutImageView.layer.cornerRadius = viewProfileTap ? 50 : 8
             zoomOutImageView.clipsToBounds = true
             self.btnMore.removeFromSuperview()
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
@@ -339,17 +343,18 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                 self.blackBackground?.alpha = 0
             }, completion: { (completed) in
                 zoomOutImageView.removeFromSuperview()
-                
+                self.viewProfileTap = false
                 self.startingImageView?.isHidden = false
             })
             
         }
     }
+    var viewProfileTap = false
     
     func viewEditProfileImage(header: HeaderView){
 
         performZoomForImageView(startingImageView: header.profileImageView, hideMoreButton: true)
-        
+        viewProfileTap = true
     }
     
     func viewEditBackgroundImage(header: HeaderView){
@@ -362,12 +367,14 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         }
         alert.addAction(actionViewImage)
         
-        let actionChangeImage = UIAlertAction(title: "Change Background Image", style: .default) { (alert) in
-            self.changeBackgroundImageFlag = true
-            self.handleChangeBackgroundImage()
+        if user?.id == Auth.auth().currentUser?.uid {
+            let actionChangeImage = UIAlertAction(title: "Change Background Image", style: .default) { (alert) in
+                self.changeBackgroundImageFlag = true
+                self.handleChangeBackgroundImage()
+            }
+            alert.addAction(actionChangeImage)
         }
         
-        alert.addAction(actionChangeImage)
         
         let actionCancel = UIAlertAction(title: "Cancel", style: .cancel) { (alert) in
             
@@ -402,12 +409,12 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
         self.navigationController?.navigationBar.shadowImage = nil
         self.navigationController?.navigationBar.isHidden = false
-        self.navigationController?.navigationBar.removeGestureRecognizer(tapGesture!)
         navigationController?.popViewController(animated: true)
         
     }
     
     func namePhoneEdit(infor: String){
+        
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
         var value : [String: Any]?
         switch infor {
@@ -516,8 +523,6 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
 
         }
         
-        
-        
         let actionOk = UIAlertAction(title: "Ok", style: .default) { (alertController) in
             let userReference = Database.database().reference().child("users").child((self.user?.id)!)
             userReference.updateChildValues(["birthDay": (self.birthDateTextField?.text)!], withCompletionBlock: { (err, ref) in
@@ -541,13 +546,72 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         self.present(alert, animated: true, completion: nil)
     }
     
+    var genderTextField: UITextField?
+    var genderPicker = UIPickerView()
+    var dataGender = ["Male","Female"]
     
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return dataGender.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return dataGender[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+      
+        genderTextField?.text = dataGender[row]
+    }
+    
+    
+    
+    func genderEdit(){
+
+        let alert = UIAlertController(title: "Edit Gender", message: nil, preferredStyle: .alert)
+        alert.addTextField { (tf) in
+            self.genderTextField = tf
+            if let gender = self.user?.gender {
+                self.genderTextField?.text = gender
+            }else{
+                self.genderTextField?.text = self.dataGender[0]
+            }
+            self.genderTextField?.inputView = self.genderPicker
+ 
+        }
+        
+        let actionOk = UIAlertAction(title: "Ok", style: .default) { (alertController) in
+            let userReference = Database.database().reference().child("users").child((self.user?.id)!)
+            userReference.updateChildValues(["gender": (self.genderTextField?.text)!], withCompletionBlock: { (err, ref) in
+                if err != nil{
+                    print(err!)
+                    return
+                }
+                self.user?.gender = self.genderTextField?.text!
+
+                DispatchQueue.main.async {
+                    self.collectionView?.reloadData()
+                }
+            })
+            
+        }
+        
+        let actionCancel = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+        
+        alert.addAction(actionOk)
+        alert.addAction(actionCancel)
+        self.present(alert, animated: true, completion: nil)
+    }
     
     func handleEditInfor(cell: UICollectionViewCell){
         let indexTapped = collectionView?.indexPath(for: cell)
         switch indexTapped?.item {
         case 1: namePhoneEdit(infor: "name")
         case 2: namePhoneEdit(infor: "fullName")
+        case 3: genderEdit()
         case 4: birthDayEdit()
         case 5: namePhoneEdit(infor: "phoneNumber")
         
@@ -562,6 +626,12 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellInforId, for: indexPath) as! InformationCell
             cell.personalViewController = self
             
+            if user?.id != Auth.auth().currentUser?.uid{
+                cell.btnEdit.isHidden = true
+            }else{
+                cell.btnEdit.isHidden = false
+            }
+            
             switch indexPath.row {
                 
             case 0:
@@ -572,11 +642,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             case 1:
                 cell.label.text = "Nick name:"
                 cell.imageView.image = UIImage(named: "ic_nickname")
-                if user?.id != Auth.auth().currentUser?.uid{
-                    cell.btnEdit.isHidden = true
-                }else{
-                    cell.btnEdit.isHidden = false
-                }
+
                 if let name = user?.name {
                     cell.labelInfo.text = name
                     cell.labelInfo.textColor = UIColor.black

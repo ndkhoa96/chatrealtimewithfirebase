@@ -11,19 +11,21 @@ import Firebase
 
 extension LoginController:UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
+    
+    
     func handleLogin(){
         view.endEditing(true)
         let sv = UIViewController.displaySpinner(onView: view)
         guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty , let password = passwordTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty
             else {
                 UIViewController.removeSpinner(spinner: sv)
-                inputsContainerView.shake(count: 5, for: 0.3, withTranslation: 5)
+                inputsContainerView.shake(count: 3, for: timeShakeAnim, withTranslation: 3)
                 return
         }
         Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
             if error != nil{
                 UIViewController.removeSpinner(spinner: sv)
-                self.inputsContainerView.shake(count: 5, for: 0.3, withTranslation: 5)
+                self.inputsContainerView.shake(count: 3, for: self.timeShakeAnim, withTranslation: 3)
                 return
             }
 
@@ -43,7 +45,7 @@ extension LoginController:UIImagePickerControllerDelegate, UINavigationControlle
             let name = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty
             else {
                 UIViewController.removeSpinner(spinner: sv)
-                inputsContainerView.shake(count: 5, for: 0.3, withTranslation: 5)
+                inputsContainerView.shake(count: 3, for: timeShakeAnim, withTranslation: 3)
                 return
         }
         
