@@ -28,7 +28,7 @@ class CustomTabBarController: UITabBarController {
         friendsNavController.tabBarItem.image = UIImage(named: "ic_friends")
         friendsNavController.tabBarItem.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -9, right: 0)
         
-        viewControllers = [recentMessagesNavController, groupsMessagesNavController, friendsNavController]
+        viewControllers = [friendsNavController, recentMessagesNavController, groupsMessagesNavController]
     }
 
 }

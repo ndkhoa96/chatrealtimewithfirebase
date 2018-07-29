@@ -9,23 +9,30 @@
 import UIKit
 import Firebase
 
-class PersionalPageViewController : UICollectionViewController, UICollectionViewDelegateFlowLayout,UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UIPickerViewDataSource, UIPickerViewDelegate  {
+class PersionalPageViewController : UICollectionViewController, UICollectionViewDelegateFlowLayout,UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
-    var user : User?
-    var photos = [UIImage]()
+    var user : User? {
+        didSet{
+            self.fetchUserPhotos()
+        }
+    }
+    var imageUrls = [String]()
+    var imageUrlsDictionary = [String : String]()
     
     let cellInforId = "CellInforId"
     let cellPhotosId = "CellPhotosId"
     let headerBackGroundId = "HeaderBackGroundId"
     let headerSecondId = "HeaderSecondId"
     
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView?.register(InformationCell.self, forCellWithReuseIdentifier: cellInforId)
         collectionView?.register(PhotoCell.self, forCellWithReuseIdentifier: cellPhotosId)
-        collectionView?.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerBackGroundId)
-        collectionView?.register(HeaderView2.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerSecondId)
-        collectionView?.backgroundColor = UIColor.gray
+        collectionView?.register(BackgroundImageHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerBackGroundId)
+        collectionView?.register(InformationAndPhotosHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerSecondId)
+        collectionView?.backgroundColor = Theme.shared.lightGrayColor
    
         
         self.navigationController?.navigationBar.barTintColor = UIColor.clear
@@ -39,7 +46,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         
         
         if user?.id == Auth.auth().currentUser?.uid {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named:"ic_add_photo"), style: .plain, target: self, action: #selector(handleBack))
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named:"ic_add_photo"), style: .plain, target: self, action: #selector(handleAddPhoto))
             self.navigationItem.rightBarButtonItem?.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -6)
             btnMore.isHidden = false
         }
@@ -48,6 +55,9 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         genderPicker.dataSource = self
    
     }
+    
+
+    
     var heightItem = 60
     var widthItem = Int(UIScreen.main.bounds.width)
     var minimumLineSpacingForSection = 5.0
@@ -55,35 +65,77 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
 
     var flag = false
     
-    func fetchUserInformation(){
-        minimumInteritemSpacingForSection = 0.0
-        minimumLineSpacingForSection = 5.0
-        heightItem = 60
-        widthItem = Int(view.frame.width)
-        flag = false
-        collectionView?.reloadData()
+    func showUserInformation(){
+        
+        UIView.transition(with: (collectionView?.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 1)))!, duration: 0.3, options: .transitionFlipFromRight, animations: {
+            self.minimumInteritemSpacingForSection = 0.0
+            self.minimumLineSpacingForSection = 5.0
+            self.heightItem = 60
+            self.widthItem = Int(self.view.frame.width)
+            self.flag = false
+        }) { (finish) in
+            self.collectionView?.reloadData()
+        }
+        
+    }
+
+    func showUserPhotos(){
+        
+        UIView.transition(with: (collectionView?.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 1)))!, duration: 0.3, options: .transitionFlipFromLeft, animations: {
+            self.heightItem = Int((self.view.frame.width / 3.0))-1
+            self.widthItem = self.heightItem
+            self.minimumInteritemSpacingForSection = 1.0
+            self.minimumLineSpacingForSection = 1.0
+            self.flag = true
+        }) { (finish) in
+            self.collectionView?.reloadData()
+        }
         
     }
     
     func fetchUserPhotos(){
-        heightItem = Int((view.frame.width / 3.0))-1
-        widthItem = heightItem
-        minimumInteritemSpacingForSection = 1.0
-        minimumLineSpacingForSection = 1.0
-        flag = true
-        collectionView?.reloadData()
-    }
-    
-    func setUpHeader(){
-        //collectionView.h
-    }
-    
-    
-    var tapGesture : UITapGestureRecognizer?
-    
-    @objc func handleTap(){
+
+        let dbRef = Database.database().reference().child("user-images").child((user?.id)!)
+        dbRef.observe(.childAdded, with: { (snapshot) in
+            if let imageUrl = snapshot.value as? String {
+                self.imageUrls.append(imageUrl)
+                self.imageUrlsDictionary[snapshot.key] = imageUrl
+
+            }
+
+        }, withCancel: nil)
         
     }
+    var indexPhotoDelete: Int?
+    
+    func handleShowPhoto(cell: PhotoCell){
+        let indexTapped = collectionView?.indexPath(for: cell)
+        indexPhotoDelete = indexTapped?.row
+        
+        performZoomForImageView(startingImageView: cell.imageView, showMoreButton: true)
+    }
+    
+    @objc func handleAddPhoto(){
+        addPhotoFlag = true
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        
+        let actionGallery = UIAlertAction(title: "Open Gallery", style: .default) { (alert) in
+            self.openGallery()
+        }
+        let actionCamera = UIAlertAction(title: "Take a picture", style: .default) { (alert) in
+            self.openCamera()
+        }
+        
+        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel) { (alert) in
+            self.addPhotoFlag = false
+        }
+        
+        alert.addAction(actionGallery)
+        alert.addAction(actionCamera)
+        alert.addAction(actionCancel)
+        self.present(alert,animated: true)
+    }
+    
     
     var startingFrame: CGRect?
     var blackBackground: UIView?
@@ -101,21 +153,30 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         return btn
        
     }()
+
     
     @objc func handleMore(){
         
         let actionSheetAlert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let actionChange = UIAlertAction(title: "Change Profile Image", style: .default) { (alert) in
-            self.changeProfileImageFlag = true
-            print(123)
-
-            self.handleChangeAvatar()
+        if profileImageViewIsShowFlag {
+            let actionChange = UIAlertAction(title: "Change Profile Image", style: .default) { (alert) in
+                
+                self.handleChangeAvatar()
+            }
+            actionSheetAlert.addAction(actionChange)
+        }else{
+            let actionDelete = UIAlertAction(title: "Delete This Photo", style: .destructive) { (alert) in
+                
+                self.handleDeletePhoto()
+            }
+            actionSheetAlert.addAction(actionDelete)
         }
+        
         
         let actionCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
-        actionSheetAlert.addAction(actionChange)
+        
         actionSheetAlert.addAction(actionCancel)
         
         self.present(actionSheetAlert, animated: true, completion: nil)
@@ -123,8 +184,36 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
        
     }
     
-    func handleChangeAvatar(){
+    func handleDeletePhoto(){
         
+        if let index = indexPhotoDelete {
+            let sv = UIViewController.displaySpinner(onView: view)
+            
+            let dbRef = Database.database().reference().child("user-images").child((user?.id)!)
+            
+            if let key = self.imageUrlsDictionary.someKey(forValue: self.imageUrls[index]){
+                dbRef.child(key).removeValue(completionBlock: { (error, ref) in
+                    if error != nil {
+                        print(error!)
+                        return
+                    }
+                    print("Delete successfully")
+                    self.imageUrls.remove(at: index)
+                    self.imageUrlsDictionary.removeValue(forKey: key)
+                    self.handleZoomOutTap()
+                    
+                    UIViewController.removeSpinner(spinner: sv)
+                    DispatchQueue.main.async {
+                        self.collectionView?.reloadData()
+                    }
+                })
+            }
+            
+        }
+    }
+    
+    func handleChangeAvatar(){
+        changeProfileImageFlag = true
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
         
         let actionGallery = UIAlertAction(title: "Open Gallery", style: .default) { (alert) in
@@ -134,7 +223,9 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             self.openCamera()
         }
         
-        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel) { (alert) in
+            self.changeProfileImageFlag = false
+        }
         
         alert.addAction(actionGallery)
         alert.addAction(actionCamera)
@@ -168,7 +259,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         imageGalleryPickerController.allowsEditing = true
         
         self.present(imageGalleryPickerController, animated: true, completion: nil)
-         
+        
         
     }
     
@@ -183,7 +274,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
     
     var changeProfileImageFlag = false
     var changeBackgroundImageFlag = false
-    
+    var addPhotoFlag = false
     
     func handleImageSelectedForInfo(info: [String: Any]){
         var selectedImageFromPicker: UIImage?
@@ -224,6 +315,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                                         print(err!)
                                         return
                                     }
+                                    self.handleZoomOutTap()
                                     self.user?.profileImageUrl = imageUrl
                                     UIViewController.removeSpinner(spinner: sv)
                                     
@@ -236,8 +328,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                         })
                     }
                 }
-                
-                
+
             }else if changeBackgroundImageFlag {
                 let sv = UIViewController.displaySpinner(onView: view)
                 // Create a reference to the file to delete
@@ -280,8 +371,41 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                     }
                     
                 }
+            }else if addPhotoFlag {
+                print("add photo")
+                let sv = UIViewController.displaySpinner(onView: view)
+                let imageName = NSUUID().uuidString
+                let storageRef = Storage.storage().reference().child("user_images").child((user?.email)!).child(imageName+".jpg")
+                if let data = UIImageJPEGRepresentation(selectedImage, 0.1){
+                    storageRef.putData(data, metadata: nil, completion: { (metadata, error) in
+                        
+                        if error != nil{
+                            print("Fail to upload image", error!)
+                            return
+                        }
+                        
+                        let userReference = Database.database().reference().child("user-images").child((self.user?.id)!).childByAutoId()
+                        
+                        if let imageUrl = metadata?.downloadURL()?.absoluteString{
+                            userReference.setValue(imageUrl, withCompletionBlock: { (err, ref) in
+                                if err != nil{
+                                    print(err!)
+                                    return
+                                }
+
+                                UIViewController.removeSpinner(spinner: sv)
+                                
+                                DispatchQueue.main.async {
+                                    self.collectionView?.reloadData()
+                                }
+                            })
+                        }
+                        
+                    })
+                }
             }
-                
+            
+            addPhotoFlag = false
             changeProfileImageFlag = false
             changeBackgroundImageFlag = false
             
@@ -291,10 +415,11 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         changeProfileImageFlag = false
         changeBackgroundImageFlag = false
+        addPhotoFlag = false
         dismiss(animated: true, completion: nil)
     }
     
-    func performZoomForImageView(startingImageView: UIImageView, hideMoreButton: Bool){
+    func performZoomForImageView(startingImageView: UIImageView, showMoreButton: Bool){
         navigationController?.navigationBar.isHidden = true
         self.startingImageView = startingImageView
         self.startingImageView?.isHidden = true
@@ -314,7 +439,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         
         view.addSubview(blackBackground!)
         view.addSubview(zoomingImageView!)
-        if hideMoreButton {
+        if showMoreButton {
             view.addSubview(btnMore)
             
         }
@@ -332,10 +457,10 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         
     }
     
-    @objc func handleZoomOutTap(tapGesture: UITapGestureRecognizer){
+    @objc func handleZoomOutTap(){
         navigationController?.navigationBar.isHidden = false
-        if let zoomOutImageView = tapGesture.view{
-            zoomOutImageView.layer.cornerRadius = viewProfileTap ? 50 : 8
+        if let zoomOutImageView = zoomingImageView {
+            zoomOutImageView.layer.cornerRadius = profileImageViewIsShowFlag ? 50 : 8
             zoomOutImageView.clipsToBounds = true
             self.btnMore.removeFromSuperview()
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
@@ -343,33 +468,33 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                 self.blackBackground?.alpha = 0
             }, completion: { (completed) in
                 zoomOutImageView.removeFromSuperview()
-                self.viewProfileTap = false
+                self.profileImageViewIsShowFlag = false
                 self.startingImageView?.isHidden = false
             })
             
         }
     }
-    var viewProfileTap = false
     
-    func viewEditProfileImage(header: HeaderView){
-
-        performZoomForImageView(startingImageView: header.profileImageView, hideMoreButton: true)
-        viewProfileTap = true
+    var profileImageViewIsShowFlag = false
+    
+    func viewEditProfileImage(header: BackgroundImageHeader){
+        profileImageViewIsShowFlag = true
+        performZoomForImageView(startingImageView: header.profileImageView, showMoreButton: true)
+        
     }
     
-    func viewEditBackgroundImage(header: HeaderView){
+    func viewEditBackgroundImage(header: BackgroundImageHeader){
 
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         let actionViewImage = UIAlertAction(title: "View Background Image", style: .default) { (alert) in
-            self.performZoomForImageView(startingImageView: header.backgroundImageView, hideMoreButton: false)
+            self.performZoomForImageView(startingImageView: header.backgroundImageView, showMoreButton: false)
         }
         alert.addAction(actionViewImage)
         
         if user?.id == Auth.auth().currentUser?.uid {
             let actionChangeImage = UIAlertAction(title: "Change Background Image", style: .default) { (alert) in
-                self.changeBackgroundImageFlag = true
                 self.handleChangeBackgroundImage()
             }
             alert.addAction(actionChangeImage)
@@ -385,7 +510,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
     }
     
     @objc func handleChangeBackgroundImage(){
-        
+        self.changeBackgroundImageFlag = true
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
         
         let actionGallery = UIAlertAction(title: "Open Gallery", style: .default) { (alert) in
@@ -395,7 +520,9 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             self.openCamera()
         }
         
-        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let actionCancel = UIAlertAction(title: "Cancel", style: .cancel) { (alert) in
+            self.changeBackgroundImageFlag = false
+        }
         
         alert.addAction(actionGallery)
         alert.addAction(actionCamera)
@@ -550,23 +677,6 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
     var genderPicker = UIPickerView()
     var dataGender = ["Male","Female"]
     
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return dataGender.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return dataGender[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-      
-        genderTextField?.text = dataGender[row]
-    }
-    
     
     
     func genderEdit(){
@@ -576,6 +686,10 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             self.genderTextField = tf
             if let gender = self.user?.gender {
                 self.genderTextField?.text = gender
+                if gender == self.dataGender[1]{
+                    self.genderPicker.selectRow(1, inComponent: 0, animated: true)
+                }
+                
             }else{
                 self.genderTextField?.text = self.dataGender[0]
             }
@@ -709,6 +823,8 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             return cell
         }else{
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellPhotosId, for: indexPath) as! PhotoCell
+            cell.personalPageVC = self
+            cell.imageView.loadImageUsingCacheWithUrlString(urlString: imageUrls[indexPath.row])
             return cell
         }
 
@@ -723,12 +839,22 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             return 0
         }
         if flag {
-            return 10
+            return imageUrls.count
         }else{
             return 6
         }
         
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        cell.alpha = 0
+        cell.layer.transform = CATransform3DMakeScale(0.5, 0.5, 0.5)
+        UIView.animate(withDuration: 0.4, animations: { () -> Void in
+            cell.alpha = 1
+            cell.layer.transform = CATransform3DScale(CATransform3DIdentity, 1, 1, 1)
+        })
+    }
+    
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
@@ -736,7 +862,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
         
         switch section {
         case 0:
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerBackGroundId, for: indexPath) as! HeaderView
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerBackGroundId, for: indexPath) as! BackgroundImageHeader
             headerView.personalPageVC = self
             headerView.nameLabel.text = user?.name!
             
@@ -749,7 +875,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             
             return headerView
         default:
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerSecondId, for: indexPath) as! HeaderView2
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerSecondId, for: indexPath) as! InformationAndPhotosHeader
             headerView.personalPageVC = self
             
             return headerView
@@ -782,168 +908,24 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
     
     
 }
-
-class HeaderView : UICollectionReusableView {
+extension PersionalPageViewController: UIPickerViewDataSource, UIPickerViewDelegate {
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        let lpg = UILongPressGestureRecognizer(target: self, action: #selector(handleBackgroundImageView))
-        lpg.minimumPressDuration = 1
-        backgroundImageView.addGestureRecognizer(lpg)
-        profileImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleAvatar)))
-        setUpView()
-
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
     }
     
-    var personalPageVC : PersionalPageViewController?
-    
-    @objc func handleBackgroundImageView(){
-        personalPageVC?.viewEditBackgroundImage(header: self)
-        
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return dataGender.count
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return dataGender[row]
     }
     
-    func setUpView(){
-
-        addSubview(backgroundImageView)
-        backgroundImageView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        backgroundImageView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        backgroundImageView.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
-        backgroundImageView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
-        backgroundImageView.addSubview(profileImageView)
-        profileImageView.leftAnchor.constraint(equalTo: backgroundImageView.leftAnchor, constant: 8).isActive = true
-        profileImageView.bottomAnchor.constraint(equalTo: backgroundImageView.bottomAnchor, constant: -4).isActive = true
-        profileImageView.widthAnchor.constraint(equalToConstant: 100).isActive = true
-        profileImageView.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        
-        backgroundImageView.addSubview(nameLabel)
-        nameLabel.leftAnchor.constraint(equalTo: profileImageView.rightAnchor, constant: 8).isActive = true
-        nameLabel.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
-        nameLabel.widthAnchor.constraint(equalToConstant: 300).isActive = true
-        nameLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
-  
+        genderTextField?.text = dataGender[row]
     }
     
-    var backgroundImageView : UIImageView = {
-        let imV = UIImageView()
-        imV.translatesAutoresizingMaskIntoConstraints = false
-        imV.image = UIImage(named: "person_bg2")
-        imV.isUserInteractionEnabled = true
-        return imV
-    }()
-    
-    var profileImageView : UIImageView = {
-        let imV = UIImageView(image: UIImage(named: "test"))
-        imV.translatesAutoresizingMaskIntoConstraints = false
-        imV.contentMode = .scaleAspectFill
-        imV.isUserInteractionEnabled = true
-        imV.layer.cornerRadius = 50
-        imV.layer.masksToBounds = true
-        imV.layer.borderWidth = 1
-        imV.layer.borderColor = Theme.shared.whiteColor.cgColor
-        imV.isUserInteractionEnabled = true
-
-        return imV
-    }()
-    
-    
-    var nameLabel : UILabel = {
-        let label = UILabel()
-        label.text = "Khoa Nguyen"
-        label.font = UIFont.boldSystemFont(ofSize: 22)
-        label.textColor = Theme.shared.whiteColor
-        label.textAlignment = .left
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        
-        return label
-    }()
-    
-    @objc func handleAvatar() {
-        personalPageVC?.viewEditProfileImage(header: self)
-    }
-}
-
-class HeaderView2 : UICollectionReusableView {
-    
-    var personalPageVC : PersionalPageViewController?
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        backgroundColor = UIColor.white
-        setUpView()
-    }
-    
-    func setUpView(){
-        
-        self.addSubview(btnInfo)
-        btnInfo.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-        btnInfo.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        btnInfo.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 1/2).isActive = true
-        btnInfo.heightAnchor.constraint(equalToConstant: self.frame.height - 16).isActive = true
-        
-        let separateView = UIView()
-        separateView.translatesAutoresizingMaskIntoConstraints = false
-        separateView.backgroundColor = UIColor.gray
-        
-        self.addSubview(separateView)
-        separateView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-        separateView.leftAnchor.constraint(equalTo: btnInfo.rightAnchor).isActive = true
-        separateView.widthAnchor.constraint(equalToConstant: 1).isActive = true
-        separateView.heightAnchor.constraint(equalToConstant: self.frame.height - 16).isActive = true
-        
-        self.addSubview(btnPhotos)
-        btnPhotos.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-        btnPhotos.leftAnchor.constraint(equalTo: separateView.rightAnchor).isActive = true
-        btnPhotos.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 1/2).isActive = true
-        btnPhotos.heightAnchor.constraint(equalToConstant: self.frame.height - 16).isActive = true
-        
-    }
-    
-    let btnInfo : UIButton = {
-        let btn = UIButton()
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Information", for: .normal)
-        btn.setTitleColor(Theme.shared.secondaryColor, for: .normal)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        btn.addTarget(self, action: #selector(handleInformation), for: .touchUpInside)
-        
-        return btn
-    }()
-    
-    
-    @objc func handleInformation(){
-        personalPageVC?.fetchUserInformation()
-        btnInfo.setTitleColor(Theme.shared.secondaryColor, for: .normal)
-        btnPhotos.setTitleColor(Theme.shared.grayColor, for: .normal)
-    }
-    
-    @objc func handlePhotos(){
-        personalPageVC?.fetchUserPhotos()
-        btnInfo.setTitleColor(Theme.shared.grayColor, for: .normal)
-        btnPhotos.setTitleColor(Theme.shared.secondaryColor, for: .normal)
-        
-    }
-    
-    let btnPhotos : UIButton = {
-        let btn = UIButton()
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Photos", for: .normal)
-        btn.setTitleColor(Theme.shared.grayColor, for: .normal)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        btn.addTarget(self, action: #selector(handlePhotos), for: .touchUpInside)
-        
-        return btn
-    }()
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
 }
 

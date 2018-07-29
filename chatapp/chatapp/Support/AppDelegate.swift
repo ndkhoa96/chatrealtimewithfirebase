@@ -24,7 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().barTintColor = Theme.shared.secondaryColor
         UINavigationBar.appearance().tintColor = Theme.shared.whiteColor
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor:Theme.shared.whiteColor]
-        //UIBarButtonItem.appearance().setTitleTextAttributes([NSAttributedStringKey.foregroundColor : UIColor.clear], for: .normal)
         
         UITabBar.appearance().isTranslucent = true
         UITabBar.appearance().isOpaque = true
@@ -32,7 +31,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
         
-        //window?.rootViewController = UINavigationController(rootViewController: MessagesController())
         window?.rootViewController = CustomTabBarController()
         return true
     }

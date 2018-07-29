@@ -19,7 +19,8 @@ class GroupsMessagesController: BaseTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_newgroup"), style: .plain, target: self, action: #selector(handleNewGroup))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleNewGroup))
+
         tableView.register(GroupCell.self, forCellReuseIdentifier: cellId2)
         observeGroups()
     }
@@ -343,7 +344,6 @@ class GroupsMessagesController: BaseTableViewController {
             self.blackView.alpha = 1
             
             self.blackView.transform = CGAffineTransform.identity
-            self.view.layoutIfNeeded()
         }
         self.nameGroupTextField.becomeFirstResponder()
         
@@ -373,6 +373,13 @@ class GroupsMessagesController: BaseTableViewController {
         
         self.showChatControllerForUser(group: group)
         
+    }
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        UIView.animate(withDuration: 0.4) {
+            cell.transform = CGAffineTransform.identity
+        }
     }
     
     func showChatControllerForUser(group: Group){

@@ -27,8 +27,7 @@ class LoginController: UIViewController, UITextFieldDelegate {
         let view = UIView()
         view.backgroundColor = UIColor.clear
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.layer.cornerRadius = 5
-        view.layer.masksToBounds = true
+
         return view
     }()
     

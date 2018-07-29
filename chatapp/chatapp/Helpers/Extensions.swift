@@ -9,6 +9,7 @@
 import UIKit
 
 let imageCache = NSCache<AnyObject, AnyObject>()
+
 extension UIImageView {
     func loadImageUsingCacheWithUrlString(urlString:String) {
         self.image = nil
@@ -101,6 +102,39 @@ extension UIView {
         layer.add(animation, forKey: "shake")
         
     }
+    
+    
+    func slideInFromLeft(duration: TimeInterval = 1.0) {
+        // Create a CATransition animation
+        let slideInFromLeftTransition = CATransition()
+        
+        // Customize the animation's properties
+        slideInFromLeftTransition.type = kCATransitionMoveIn
+        slideInFromLeftTransition.subtype = kCATransitionFromLeft
+        slideInFromLeftTransition.duration = duration
+        slideInFromLeftTransition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+        slideInFromLeftTransition.fillMode = kCAFillModeRemoved
+        
+        // Add the animation to the View's layer
+        self.layer.add(slideInFromLeftTransition, forKey: "slideInFromLeftTransition")
+    }
+    
+    func slideIOutFromRight(duration: TimeInterval = 1.0) {
+        // Create a CATransition animation
+        let slideInFromLeftTransition = CATransition()
+        
+        // Customize the animation's properties
+        slideInFromLeftTransition.type = kCATransitionFromRight
+        slideInFromLeftTransition.subtype = kCATransitionFromRight
+        slideInFromLeftTransition.duration = duration
+        slideInFromLeftTransition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+        slideInFromLeftTransition.fillMode = kCAFillModeRemoved
+        
+        // Add the animation to the View's layer
+        self.layer.add(slideInFromLeftTransition, forKey: "slideInFromRightTransition")
+    }
+    
+    
 }
 
 extension UILabel {
@@ -120,4 +154,8 @@ extension String{
         return self[index(startIndex, offsetBy: 1)]
     }
 }
-
+extension Dictionary where Value: Equatable {
+    func someKey(forValue val: Value) -> Key? {
+        return first(where: { $1 == val })?.key
+    }
+}

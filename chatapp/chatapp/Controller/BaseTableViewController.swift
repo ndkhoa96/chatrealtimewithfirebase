@@ -171,36 +171,125 @@ class BaseTableViewController: UITableViewController {
         nameLabel.widthAnchor.constraint(equalToConstant: 180).isActive = true
         nameLabel.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
+        // separateView 1
+        let separateView1 = UIView()
+        separateView1.backgroundColor = UIColor.lightGray
+        separateView1.translatesAutoresizingMaskIntoConstraints = false
+        
+        menuView.addSubview(separateView1)
+        separateView1.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8).isActive = true
+        separateView1.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
+        separateView1.widthAnchor.constraint(equalTo: menuView.widthAnchor, multiplier: 0.8).isActive = true
+        separateView1.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        
+        //btn Profile
         let btnProfile = UIButton()
         btnProfile.setImage(UIImage(named: "ic_profile"), for: .normal)
-        btnProfile.setTitle("Profile", for: .normal)
-        btnProfile.setTitleColor(Theme.shared.blackColor, for: .normal)
-        btnProfile.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        btnProfile.contentHorizontalAlignment = .left
+        btnProfile.setTitle("Information", for: .normal)
+        btnProfile.setTitleColor(Theme.shared.secondaryColor, for: .normal)
+        btnProfile.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
+        btnProfile.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 15)
+        btnProfile.layer.cornerRadius = 10
+        btnProfile.layer.masksToBounds = true
+        btnProfile.contentHorizontalAlignment = .center
         btnProfile.translatesAutoresizingMaskIntoConstraints = false
         btnProfile.addTarget(self, action: #selector(handleMyPage), for: .touchUpInside)
         
         menuView.addSubview(btnProfile)
-        btnProfile.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8).isActive = true
+        btnProfile.topAnchor.constraint(equalTo: separateView1.bottomAnchor, constant: 8).isActive = true
         btnProfile.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
-        btnProfile.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        btnProfile.widthAnchor.constraint(equalToConstant: 180).isActive = true
         btnProfile.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
+        //separate view 2
+        let separateView2 = UIView()
+        separateView2.backgroundColor = UIColor.lightGray
+        separateView2.translatesAutoresizingMaskIntoConstraints = false
         
+        menuView.addSubview(separateView2)
+        separateView2.topAnchor.constraint(equalTo: btnProfile.bottomAnchor, constant: 8).isActive = true
+        separateView2.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
+        separateView2.widthAnchor.constraint(equalTo: menuView.widthAnchor, multiplier: 4/5).isActive = true
+        separateView2.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        
+        //btn notification
+        let btnNotification = UIButton()
+        btnNotification.setImage(UIImage(named: "ic_notification"), for: .normal)
+        btnNotification.setTitle("Notification", for: .normal)
+        btnNotification.setTitleColor(Theme.shared.secondaryColor, for: .normal)
+        btnNotification.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
+        btnNotification.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 15)
+        btnNotification.layer.cornerRadius = 10
+        btnNotification.layer.masksToBounds = true
+        btnNotification.contentHorizontalAlignment = .center
+        btnNotification.translatesAutoresizingMaskIntoConstraints = false
+        
+        menuView.addSubview(btnNotification)
+        btnNotification.topAnchor.constraint(equalTo: separateView2.bottomAnchor, constant: 8).isActive = true
+        btnNotification.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
+        btnNotification.widthAnchor.constraint(equalToConstant: 180).isActive = true
+        btnNotification.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        
+        //separate view 3
+        let separateView3 = UIView()
+        separateView3.backgroundColor = UIColor.lightGray
+        separateView3.translatesAutoresizingMaskIntoConstraints = false
+        
+        menuView.addSubview(separateView3)
+        separateView3.topAnchor.constraint(equalTo: btnNotification.bottomAnchor, constant: 8).isActive = true
+        separateView3.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
+        separateView3.widthAnchor.constraint(equalTo: menuView.widthAnchor, multiplier: 4/5).isActive = true
+        separateView3.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        
+        //btn setting
+        let btnSetting = UIButton()
+        btnSetting.setImage(UIImage(named: "ic_setting"), for: .normal)
+        btnSetting.setTitle("Setting", for: .normal)
+        btnSetting.setTitleColor(Theme.shared.secondaryColor, for: .normal)
+        btnSetting.titleEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 25)
+        btnSetting.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 45)
+        btnSetting.layer.cornerRadius = 10
+        btnSetting.layer.masksToBounds = true
+        btnSetting.contentHorizontalAlignment = .center
+        btnSetting.translatesAutoresizingMaskIntoConstraints = false
+        
+        menuView.addSubview(btnSetting)
+        btnSetting.topAnchor.constraint(equalTo: separateView3.bottomAnchor, constant: 8).isActive = true
+        btnSetting.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
+        btnSetting.widthAnchor.constraint(equalToConstant: 180).isActive = true
+        btnSetting.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        
+        //btnLogout
         let btnLogout = UIButton()
         btnLogout.setImage(UIImage(named: "ic_logout"), for: .normal)
         btnLogout.setTitle("Sign Out", for: .normal)
-        btnLogout.setTitleColor(Theme.shared.blackColor, for: .normal)
-        btnLogout.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        btnLogout.contentHorizontalAlignment = .left
+        btnLogout.setTitleColor(Theme.shared.secondaryColor, for: .normal)
+        btnLogout.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
+        btnLogout.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 15)
+        btnLogout.contentHorizontalAlignment = .center
         btnLogout.translatesAutoresizingMaskIntoConstraints = false
+        btnLogout.layer.cornerRadius = 10
+        btnLogout.layer.masksToBounds = true
         btnLogout.addTarget(self, action: #selector(handleLogout), for: .touchUpInside)
         
         menuView.addSubview(btnLogout)
-        btnLogout.bottomAnchor.constraint(equalTo: menuView.bottomAnchor, constant: -8).isActive = true
+        btnLogout.bottomAnchor.constraint(equalTo: menuView.bottomAnchor, constant: -16).isActive = true
         btnLogout.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
-        btnLogout.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        btnLogout.widthAnchor.constraint(equalToConstant: 180).isActive = true
         btnLogout.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        //separate view 5
+        let separateView5 = UIView()
+        separateView5.backgroundColor = UIColor.lightGray
+        separateView5.translatesAutoresizingMaskIntoConstraints = false
+        
+        menuView.addSubview(separateView5)
+        separateView5.bottomAnchor.constraint(equalTo: btnLogout.topAnchor, constant: -8).isActive = true
+        separateView5.centerXAnchor.constraint(equalTo: menuView.centerXAnchor).isActive = true
+        separateView5.widthAnchor.constraint(equalTo: menuView.widthAnchor, multiplier: 4/5).isActive = true
+        separateView5.heightAnchor.constraint(equalToConstant: 1).isActive = true
     }
     
     var menuView : UIView = {
@@ -209,7 +298,7 @@ class BaseTableViewController: UITableViewController {
         view.backgroundColor = UIColor.clear
         view.layer.cornerRadius = 8
         view.layer.masksToBounds = true
-        
+        view.alpha = 0
 
         
         return view
@@ -238,19 +327,18 @@ class BaseTableViewController: UITableViewController {
         blView.backgroundColor = UIColor(white: 0, alpha: 0.5)
         blView.alpha = 0
         blView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissMenu)))
-
- 
-        
-        
+  
         return blView
     }()
     
     @objc func dismissMenu(){
 
+        self.menuView.slideIOutFromRight(duration: 0.3)
         UIView.transition(with: blView, duration: 0.3, options: .curveEaseOut, animations: {
             self.blView.alpha = 0
         }) { (finish) in
             self.blView.removeFromSuperview()
+            self.menuView.alpha = 0
         }
 
     }
@@ -261,12 +349,15 @@ class BaseTableViewController: UITableViewController {
         menuView.topAnchor.constraint(equalTo: blView.topAnchor).isActive = true
         menuView.leftAnchor.constraint(equalTo: blView.leftAnchor).isActive = true
         menuView.heightAnchor.constraint(equalToConstant: blView.frame.height).isActive = true
-        menuView.widthAnchor.constraint(equalToConstant: self.view.frame.width/2).isActive = true
+        menuView.widthAnchor.constraint(equalTo: blView.widthAnchor, multiplier: 2/3).isActive = true
         self.windowz?.addSubview(self.blView)
+        
 
-        UIView.transition(with: blView, duration: 0.3, options: .curveEaseIn, animations: {
-            
+        menuView.slideInFromLeft(duration: 0.3)
+
+        UIView.transition(with: blView, duration: 0.3, options: .curveEaseIn, animations: {   
             self.blView.alpha = 1
+            self.menuView.alpha = 1
         }, completion: nil)
         
             

@@ -18,6 +18,8 @@
 		6E570DAE20DB58FD0079DBBC /* GroupCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E570DAD20DB58FD0079DBBC /* GroupCell.swift */; };
 		6E570DB020DB937B0079DBBC /* BaseChatLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E570DAF20DB937A0079DBBC /* BaseChatLogController.swift */; };
 		6E570DB220DB9CFD0079DBBC /* GroupChatLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E570DB120DB9CFD0079DBBC /* GroupChatLogController.swift */; };
+		6E5989CD21096EA6004DEE2E /* BackgroundImageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5989CC21096EA6004DEE2E /* BackgroundImageHeader.swift */; };
+		6E5989CF21096F87004DEE2E /* InformationAndPhotosHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5989CE21096F87004DEE2E /* InformationAndPhotosHeader.swift */; };
 		6E7143A320695CE5005B6522 /* ChatMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7143A220695CE5005B6522 /* ChatMessageCell.swift */; };
 		6E7FDF4420D8F9F4009AB0B3 /* GroupsMessagesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7FDF4320D8F9F4009AB0B3 /* GroupsMessagesController.swift */; };
 		6E828213205A1BC70092D70C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E828212205A1BC70092D70C /* AppDelegate.swift */; };
@@ -55,6 +57,8 @@
 		6E570DAD20DB58FD0079DBBC /* GroupCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupCell.swift; sourceTree = "<group>"; };
 		6E570DAF20DB937A0079DBBC /* BaseChatLogController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseChatLogController.swift; sourceTree = "<group>"; };
 		6E570DB120DB9CFD0079DBBC /* GroupChatLogController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupChatLogController.swift; sourceTree = "<group>"; };
+		6E5989CC21096EA6004DEE2E /* BackgroundImageHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundImageHeader.swift; sourceTree = "<group>"; };
+		6E5989CE21096F87004DEE2E /* InformationAndPhotosHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InformationAndPhotosHeader.swift; sourceTree = "<group>"; };
 		6E7143A220695CE5005B6522 /* ChatMessageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageCell.swift; sourceTree = "<group>"; };
 		6E7FDF4320D8F9F4009AB0B3 /* GroupsMessagesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsMessagesController.swift; sourceTree = "<group>"; };
 		6E82820F205A1BC70092D70C /* chatapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = chatapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,6 +173,8 @@
 				6E30EC9520F70E46009EF176 /* InformationCell.swift */,
 				6E30EC9720F70E5A009EF176 /* PhotoCell.swift */,
 				6EA887D8210036890003C955 /* FriendCell.swift */,
+				6E5989CC21096EA6004DEE2E /* BackgroundImageHeader.swift */,
+				6E5989CE21096F87004DEE2E /* InformationAndPhotosHeader.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -376,6 +382,7 @@
 				6EF2162A20D60CB7006DB122 /* Group.swift in Sources */,
 				6EBCA54D20DCA13C00DE2CA7 /* ManagerMemberController.swift in Sources */,
 				6E3927BF205C382A00F5EC6C /* LoginController+handle.swift in Sources */,
+				6E5989CF21096F87004DEE2E /* InformationAndPhotosHeader.swift in Sources */,
 				6EB5C06320C64881006D58AB /* Dimension.swift in Sources */,
 				6E9C3871206428E8001E9F7C /* Message.swift in Sources */,
 				6EBCA54F20DCBAC200DE2CA7 /* MemberCell.swift in Sources */,
@@ -389,6 +396,7 @@
 				6E30EC9620F70E46009EF176 /* InformationCell.swift in Sources */,
 				6E3927B6205BB58F00F5EC6C /* NewMessageController.swift in Sources */,
 				6EA8D5C320651C660027DB80 /* UserCell.swift in Sources */,
+				6E5989CD21096EA6004DEE2E /* BackgroundImageHeader.swift in Sources */,
 				6E570DB220DB9CFD0079DBBC /* GroupChatLogController.swift in Sources */,
 				6E0F403020623C4600C10002 /* Extensions.swift in Sources */,
 				6EBA687820EA0D4200CF5EC4 /* VideoPlayerView.swift in Sources */,

@@ -55,8 +55,18 @@ class ChatLogController: BaseChatLogController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_infor"), style: .plain, target: self, action: #selector(showProfileUser))
+        
         setupKeyboardObservers()
 
+    }
+    
+    @objc func showProfileUser(){
+        let persionnalPageController = PersionalPageViewController(collectionViewLayout: UICollectionViewFlowLayout())
+        
+        persionnalPageController.hidesBottomBarWhenPushed = true
+        persionnalPageController.user = self.user
+        navigationController?.pushViewController(persionnalPageController, animated: true)
     }
  
     func setupKeyboardObservers() {
@@ -230,7 +240,7 @@ class ChatLogController: BaseChatLogController {
         let imageName = NSUUID().uuidString
         let storageRef = Storage.storage().reference().child("message_images").child(imageName)
         
-        if let data = UIImageJPEGRepresentation(image, 0.2){
+        if let data = UIImageJPEGRepresentation(image, 0.1){
             storageRef.putData(data, metadata: nil, completion: { (metadata, error) in
                 
                 if error != nil{

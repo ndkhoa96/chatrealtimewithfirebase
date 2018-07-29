@@ -12,7 +12,6 @@ import Firebase
 extension LoginController:UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
     
-    
     func handleLogin(){
         view.endEditing(true)
         let sv = UIViewController.displaySpinner(onView: view)
@@ -28,12 +27,11 @@ extension LoginController:UIImagePickerControllerDelegate, UINavigationControlle
                 self.inputsContainerView.shake(count: 3, for: self.timeShakeAnim, withTranslation: 3)
                 return
             }
-
+            UIViewController.removeSpinner(spinner: sv)
             
             let customTabBarController = CustomTabBarController()
             
             self.present(customTabBarController, animated: true, completion: nil)
-            UIViewController.removeSpinner(spinner: sv)
         }
     }
 

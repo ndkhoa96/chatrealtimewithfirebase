@@ -58,7 +58,7 @@ class GroupChatLogController: BaseChatLogController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_member"), style: .plain, target: self, action: #selector(handleAddMember))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "group_setting"), style: .plain, target: self, action: #selector(handleAddMember))
 
         setupKeyboardObservers() 
         inputAccessoryView?.becomeFirstResponder()
@@ -280,7 +280,7 @@ class GroupChatLogController: BaseChatLogController {
         let imageName = NSUUID().uuidString
         let storageRef = Storage.storage().reference().child("message_images").child(imageName)
         
-        if let data = UIImageJPEGRepresentation(image, 0.2){
+        if let data = UIImageJPEGRepresentation(image, 0.1){
             storageRef.putData(data, metadata: nil, completion: { (metadata, error) in
                 
                 if error != nil{

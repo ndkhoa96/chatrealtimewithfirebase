@@ -19,6 +19,10 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
         
         tableView.register(FriendCell.self, forCellReuseIdentifier: friendCellId)
         searchBar.delegate = self
+        rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "search"), style: .plain, target: self, action: #selector(handleSearch))
+        leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_menu"), style: .plain, target: self, action: #selector(handleShowMenu))
+        searchBarButtonItem = UIBarButtonItem(customView: searchBar)
+        
         fetchUser()
         setupNavigationBar()
     }
@@ -29,80 +33,51 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
         searchBar.sizeToFit()
         searchBar.showsCancelButton = true
         searchBar.placeholder = "Search by name"
+        let textFieldInsideSearchBar = searchBar.value(forKey: "searchField") as? UITextField
+        textFieldInsideSearchBar?.textColor = Theme.shared.whiteColor
         
         return searchBar
     }()
+    var usersFillter = [User]()
     
-    // called whenever text is changed.
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+
+        users.removeAll()
         
-        //        if allFavorSegmentedControl.selectedSegmentIndex == 0{
-        //            guard !searchText.isEmpty else{
-        //                coinCharts = searchCoinCharts
-        //                tableView.reloadData()
-        //                return
-        //            }
-        //            coinCharts = searchCoinCharts.filter({ (coinChart) -> Bool in
-        //                coinChart.name.lowercased().contains(searchText.lowercased())
-        //            })
-        //
-        //        }else if  allFavorSegmentedControl.selectedSegmentIndex == 1{
-        //            var coinFavorites = [CoinChart]()
-        //            for favorite in (self.user?.favorites)!{
-        //                for coinChart in self.searchCoinCharts{
-        //                    if favorite == coinChart.symbol{
-        //                        coinFavorites.append(coinChart)
-        //                    }
-        //                }
-        //            }
-        //            guard !searchText.isEmpty else{
-        //                self.coinCharts = coinFavorites
-        //                tableView.reloadData()
-        //                return
-        //            }
-        //            coinCharts = coinFavorites.filter({ (coinChart) -> Bool in
-        //                coinChart.name.lowercased().contains(searchText.lowercased())
-        //            })
-        
-        //        }
-        //        tableView.reloadData()
+        guard !searchText.isEmpty else{
+            users = usersFillter
+            attemptReloadOfTable()
+            return
+        }
+        users = usersFillter.filter({ (user) -> Bool in
+            (user.name?.lowercased().contains(searchText.lowercased()))!
+        })
+
+        attemptReloadOfTable()
     }
     
-    // called when cancel button is clicked
+    
+    var rightBarButtonItem : UIBarButtonItem!
+    var leftBarButtonItem : UIBarButtonItem!
+    var searchBarButtonItem : UIBarButtonItem!
     
     func setupNavigationBar(){
         fetchUserAndSetupNavBarTitle()
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_menu"), style: .plain, target: self, action: #selector(handleShowMenu))
-
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "search"), style: .plain, target: self, action: #selector(handleSearch))
+        self.navigationItem.leftBarButtonItem = leftBarButtonItem
+        self.navigationItem.rightBarButtonItem = rightBarButtonItem
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        
         setupNavigationBar()
-        //        if allFavorSegmentedControl.selectedSegmentIndex == 0 {
-        //            self.coinCharts = self.searchCoinCharts
-        //        }else if allFavorSegmentedControl.selectedSegmentIndex == 1{
-        //            var coinFavorites = [CoinChart]()
-        //            for favorite in (self.user?.favorites)!{
-        //                for coinChart in self.searchCoinCharts{
-        //                    if favorite == coinChart.symbol{
-        //                        coinFavorites.append(coinChart)
-        //                    }
-        //                }
-        //            }
-        //            self.coinCharts = coinFavorites
-        //        }
-        
-        //       tableView.reloadData()
+        users = usersFillter
+        attemptReloadOfTable()
     }
     
     @objc func handleSearch(){
         navigationItem.rightBarButtonItem = nil
         navigationItem.leftBarButtonItem = nil
-        
         navigationItem.titleView = nil
-        navigationItem.rightBarButtonItem =  UIBarButtonItem(customView: searchBar)
+        navigationItem.rightBarButtonItem = searchBarButtonItem
         searchBar.becomeFirstResponder();
         searchBar.text = ""
     }
@@ -118,6 +93,7 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
                 
                 if myId != user.id{
                     self.users.append(user)
+                    self.usersFillter.append(user)
                 }
                 
                 self.attemptReloadOfTable()
@@ -283,6 +259,13 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 30
+    }
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        UIView.animate(withDuration: 0.4) {
+            cell.transform = CGAffineTransform.identity
+        }
     }
 
 }
