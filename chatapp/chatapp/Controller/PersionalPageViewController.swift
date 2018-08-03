@@ -51,6 +51,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
             btnMore.isHidden = false
         }
         collectionView?.contentInset = UIEdgeInsets(top: -70, left: 0, bottom: 30, right: 0)
+
         genderPicker.delegate = self
         genderPicker.dataSource = self
    

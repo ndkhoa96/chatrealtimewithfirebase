@@ -113,7 +113,6 @@ class LoginController: UIViewController, UITextFieldDelegate {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleSelectProfileImageView)))
-        imageView.isUserInteractionEnabled = true
         imageView.layer.cornerRadius = 75
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 1

@@ -34,9 +34,9 @@ extension UIImageView {
                 }
             }
         }).resume()
-        
     }
 }
+
 extension UIColor{
     
     convenience init(r: CGFloat, g: CGFloat, b: CGFloat) {
