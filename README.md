@@ -1,7 +1,7 @@
 # chatrealtimewithfirebase
 
 <p align="center">
-  <img width="414" height="736" src="images/image_1.PNG">
+  <img width="414" height="736" src="images/image_1.png">
 </p>
 
 <p align="center">
