@@ -31,13 +31,13 @@
 </p>
 
 <p align="center">
-  <img src="images/image_8.png">
+  <img width="621" height="736" src="images/image_8.png">
 </p>
 
 <p align="center">
-  <img src="images/image_9.png">
+  <img width="621" height="736" src="images/image_9.png">
 </p>
 
 <p align="center">
-  <img src="images/image_10.png">
+  <img width="621" height="736" src="images/image_10.png">
 </p>
