@@ -20,7 +20,6 @@ extension UIImageView {
             return
         }
         
-        
         let url = URL(string: urlString)
         URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) in
             if error != nil{
@@ -44,7 +43,7 @@ extension UIColor{
     }
 }
 extension UIButton {
-    func setBackgroundColor(color: UIColor, forState: UIControlState) {
+    func setBackgroundColor(color: UIColor, forState: UIControl.State) {
         UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
         UIGraphicsGetCurrentContext()!.setFillColor(color.cgColor)
         UIGraphicsGetCurrentContext()!.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
@@ -71,7 +70,7 @@ extension UIViewController {
     class func displaySpinner(onView : UIView) -> UIView {
         let spinnerView = UIView.init(frame: onView.bounds)
         spinnerView.backgroundColor = UIColor(white: 0, alpha: 0.5)
-        let ai = UIActivityIndicatorView.init(activityIndicatorStyle: .whiteLarge)
+        let ai = UIActivityIndicatorView.init(style: .whiteLarge)
         ai.startAnimating()
         ai.center = spinnerView.center
         
@@ -93,7 +92,7 @@ extension UIViewController {
 extension UIView {
     func shake(count: Float = 4, for duration: TimeInterval = 0.5, withTranslation translation: Float = 5){
         let animation : CABasicAnimation = CABasicAnimation(keyPath: "transform.translation.x")
-        animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
         animation.repeatCount = count
         animation.duration = duration/TimeInterval(animation.repeatCount)
         animation.autoreverses = true
@@ -109,11 +108,11 @@ extension UIView {
         let slideInFromLeftTransition = CATransition()
         
         // Customize the animation's properties
-        slideInFromLeftTransition.type = kCATransitionMoveIn
-        slideInFromLeftTransition.subtype = kCATransitionFromLeft
+        slideInFromLeftTransition.type = CATransitionType.moveIn
+        slideInFromLeftTransition.subtype = CATransitionSubtype.fromLeft
         slideInFromLeftTransition.duration = duration
-        slideInFromLeftTransition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
-        slideInFromLeftTransition.fillMode = kCAFillModeRemoved
+        slideInFromLeftTransition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        slideInFromLeftTransition.fillMode = CAMediaTimingFillMode.removed
         
         // Add the animation to the View's layer
         self.layer.add(slideInFromLeftTransition, forKey: "slideInFromLeftTransition")
@@ -124,11 +123,11 @@ extension UIView {
         let slideInFromLeftTransition = CATransition()
         
         // Customize the animation's properties
-        slideInFromLeftTransition.type = kCATransitionFromRight
-        slideInFromLeftTransition.subtype = kCATransitionFromRight
+        slideInFromLeftTransition.type = CATransitionType.reveal
+        slideInFromLeftTransition.subtype = CATransitionSubtype.fromRight
         slideInFromLeftTransition.duration = duration
-        slideInFromLeftTransition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
-        slideInFromLeftTransition.fillMode = kCAFillModeRemoved
+        slideInFromLeftTransition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        slideInFromLeftTransition.fillMode = CAMediaTimingFillMode.removed
         
         // Add the animation to the View's layer
         self.layer.add(slideInFromLeftTransition, forKey: "slideInFromRightTransition")
@@ -141,7 +140,7 @@ extension UILabel {
     func underline(){
         if let textString = self.text {
             let atributedString = NSMutableAttributedString(string: textString)
-            atributedString.addAttribute(NSAttributedStringKey.underlineStyle, value: NSUnderlineStyle.styleSingle.rawValue, range: NSRange(location: 0, length: atributedString.length - 1) )
+            atributedString.addAttribute(NSAttributedString.Key.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: atributedString.length - 1) )
             attributedText = atributedString
         }
     }

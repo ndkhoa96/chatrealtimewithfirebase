@@ -9,7 +9,7 @@
 import UIKit
 
 class Dimension {
-    
+
     class var shared: Dimension {
         struct Static {
             static var instance = Dimension()
@@ -21,12 +21,14 @@ class Dimension {
     var heightScreen: CGFloat = 1.0
     var widthScale: CGFloat = 1.0
     var heightScale: CGFloat = 1.0
+    var screenBounds: CGRect = .zero
     
     private init() {
         self.widthScale = UIScreen.main.bounds.width / 375
         self.heightScale = UIScreen.main.bounds.height / 667
         self.widthScreen = UIScreen.main.bounds.width
         self.heightScreen = UIScreen.main.bounds.height
+        self.screenBounds = UIScreen.main.bounds
     }
     
     //MARK: Font size

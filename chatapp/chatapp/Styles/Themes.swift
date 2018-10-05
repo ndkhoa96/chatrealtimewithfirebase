@@ -24,7 +24,6 @@ class Theme {
     }
     
     var secondaryColor: UIColor {
-        //return UIColor(r: 28, g: 52, b: 84)
         return UIColor(r: 56, g: 45, b: 175)
     }
     
@@ -41,11 +40,19 @@ class Theme {
     }
     
     var grayColor: UIColor{
-        //return UIColor(r: 240 , g: 240, b: 240)
         return UIColor.lightGray
     }
     
     var blackColor: UIColor{
         return UIColor.black
     }
+    
+    var incommingMessageColor: UIColor{
+        return UIColor(r: 220, g: 220, b: 220)
+    }
+    
+    var outcommingMessageColor: UIColor {
+        return blueColor
+    }
+    
 }
