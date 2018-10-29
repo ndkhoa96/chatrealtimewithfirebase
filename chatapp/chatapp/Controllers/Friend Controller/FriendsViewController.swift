@@ -4,224 +4,180 @@
 //
 //  Created by Khoa Nguyen on 7/19/18.
 //  Copyright © 2018 KhoaNguyen. All rights reserved.
-//
+//  Document file CHAT_APPLICATION_TLPT_01_FriendList.xlsx
+
 
 import UIKit
-import Firebase
 
-class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
-    
-    var users = [User]()
-    let friendCellId = "friendCellId"
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        tableView.register(FriendCell.self, forCellReuseIdentifier: friendCellId)
-        searchBar.delegate = self
-        rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "search"), style: .plain, target: self, action: #selector(handleSearch))
-        leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "ic_menu"), style: .plain, target: self, action: #selector(handleShowMenu))
-        
-        fetchUser()
-        setupNavigationBar()
+class FriendsViewController: BaseTableViewController {
+
+    //MARK: - CONSTANTS
+    struct Constant {
+        static let searchPlaceHolder = "Search by name"
+        static let searchTxfKey = "searchField"
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-
+    //MARK: - PROPERTIES
+    var friends = [User]()
+    var usersFillter = [User]()
+    static var identifier: String {
+        return String(describing: self)
     }
     
+    var timer:Timer?
+    var letters = [Character]()
+    var friendsContact = [Character: [User]]()
+    
+    //MARK: - UI
     let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.barStyle = UIBarStyle.blackTranslucent
         searchBar.sizeToFit()
         searchBar.showsCancelButton = true
-        searchBar.placeholder = "Search by name"
-        let textFieldInsideSearchBar = searchBar.value(forKey: "searchField") as? UITextField
+        searchBar.placeholder = Constant.searchPlaceHolder
+        let textFieldInsideSearchBar = searchBar.value(forKey: Constant.searchTxfKey) as? UITextField
         textFieldInsideSearchBar?.textColor = Theme.shared.whiteColor
-        
         return searchBar
     }()
-    var usersFillter = [User]()
     
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-
-        users.removeAll()
-        
-        guard !searchText.isEmpty else{
-            users = usersFillter
-            attemptReloadOfTable()
-            return
-        }
-        users = usersFillter.filter({ (user) -> Bool in
-            (user.name?.lowercased().contains(searchText.lowercased()))!
-        })
-
-        attemptReloadOfTable()
+    //MARK: - VIEW LOAD
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setDelegateAndRegister()
+        DBProvider.shared.getAllUser()
     }
     
-    
-    var rightBarButtonItem : UIBarButtonItem!
-    var leftBarButtonItem : UIBarButtonItem!
-    
-    func setupNavigationBar(){
-        fetchUserAndSetupNavBarTitle()
-        self.navigationItem.leftBarButtonItem = leftBarButtonItem
-        self.navigationItem.rightBarButtonItem = rightBarButtonItem
-        
+    //MARK: SET DELEGATE AND REGISTER
+    private func setDelegateAndRegister() {
+        tableView.register(FriendCell.self, forCellReuseIdentifier: FriendsViewController.identifier)
+        searchBar.delegate = self
+        DBProvider.shared.delegateAllUser = self
     }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        setupNavigationBar()
-        users = usersFillter
-        attemptReloadOfTable()
+    //MARK: - OVERRIDE FUNCTION
+    override func setupBarButtonItem() {
+        super.setupBarButtonItem()
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: ASSETS.ICON.SEARCH),
+                                                                 style: .plain,
+                                                                 target: self,
+                                                                 action: #selector(handleSearch))
     }
     
-    @objc func handleSearch(){
+    //MARK: - HANDLE FUNCTION
+    @objc func handleSearch() {
         navigationItem.rightBarButtonItem = nil
         navigationItem.leftBarButtonItem = nil
         navigationItem.titleView = nil
         navigationItem.titleView = searchBar
-        searchBar.becomeFirstResponder();
-        searchBar.text = ""
+        searchBar.becomeFirstResponder()
+        searchBar.text = nil
     }
-
-    
-    func fetchUser(){
-        let myId = AuthProvider.shared.userID
- 
-        DBProvider.shared.users.queryOrdered(byChild: KEY_DATA.USER.NAME).observe(.childAdded, with: { (snapshot) in
-            if let dictionary = snapshot.value as? [String: AnyObject]{
-                let user = User(values: dictionary)
-                user.id = snapshot.key
-                
-                if myId != user.id{
-                    self.users.append(user)
-                    self.usersFillter.append(user)
-                }
-                
-                self.attemptReloadOfTable()
-                
-            }
-        }, withCancel: nil)
-
-    }
-    
-    var timer:Timer?
-    
-    func attemptReloadOfTable(){
+   
+    func attemptReloadOfTable() {
         self.timer?.invalidate()
-        self.timer = Timer.scheduledTimer(timeInterval: TIME.REFRESH, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
+        self.timer = Timer.scheduledTimer(timeInterval: CONSTANT.TIME.REFRESH,
+                                          target: self,
+                                          selector: #selector(self.handleReloadTable),
+                                          userInfo: nil,
+                                          repeats: false)
     }
     
-    @objc func handleReloadTable(){
-        getFirstCharacter()
+    @objc func handleReloadTable() {
+        getListFirstCharacter()
+        getFirstCharacterForUsers()
         
         DispatchQueue.main.async {
-
             self.tableView.reloadData()
         }
     }
     
-    var letters = [Character]()
-    var friendsContact = [Character: [User]]()
-
-    func getFirstCharacter(){
-        friendsContact.removeAll()
-        
-        letters = users.map({ (user) -> Character in
-            return user.name![user.name!.startIndex]
+    func getListFirstCharacter() {
+        letters = friends.map({ (user) -> Character in
+            let nameUpcase = user.name!.uppercased()
+            return nameUpcase[nameUpcase.startIndex]
         })
         
         letters = letters.sorted()
-        letters = letters.reduce([], { (list, user) -> [Character] in
-            if !list.contains(user){
-                return list + [user]
+        letters = letters.reduce([], { (list, character) -> [Character] in
+            if !list.contains(character){
+                return list + [character]
             }
             return list
-            
         })
+    }
+    
+    func getFirstCharacterForUsers(){
+        friendsContact.removeAll()
    
-        for user in users {
-            if friendsContact[user.name![user.name!.startIndex]] == nil {
-                friendsContact[user.name![user.name!.startIndex]] = [User]()
+        for user in friends {
+            let nameUpcase = user.name!.uppercased()
+            if friendsContact[nameUpcase[nameUpcase.startIndex]] == nil {
+                friendsContact[nameUpcase[nameUpcase.startIndex]] = [User]()
             }
-            
-            friendsContact[user.name![user.name!.startIndex]]!.append(user)
+            friendsContact[nameUpcase[nameUpcase.startIndex]]!.append(user)
         }
-        
-        for (letter, list) in friendsContact {
-            friendsContact[letter] = list.sorted(by: { (user1, user2) -> Bool in
-                return user1.name! < user2.name!
-            })
-        
-        }
-
     }
     
     func callNumber(phoneNumber:String) {
         if let phoneCallURL = URL(string:"tel://\(phoneNumber)") {
             let application = UIApplication.shared
             if (application.canOpenURL(phoneCallURL)) {
-                application.open(phoneCallURL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]), completionHandler: nil)
+                application.open(phoneCallURL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]),
+                                 completionHandler: nil)
             }
         }
     }
     
-    func callUser(cell: UITableViewCell){
+    //Procesing 10.(4).1
+    func callUser(cell: UITableViewCell) {
         let indexTapped = tableView.indexPath(for: cell)
         let user = friendsContact[letters[(indexTapped?.section)!]]![(indexTapped?.row)!]
-        
         callNumber(phoneNumber: user.phoneNumber!)
     }
     
-    func showChatWithUser(cell: UITableViewCell){
-        
+    //Procesing 10.(4).2
+    func handleTapToUserChatLog(cell: UITableViewCell) {
         let indexTapped = tableView.indexPath(for: cell)
         let user = friendsContact[letters[(indexTapped?.section)!]]![(indexTapped?.row)!]
-        
-        let dbRef = DBProvider.shared.users.child(user.id!)
-        dbRef.observeSingleEvent(of: .value, with: { (snapshot) in
-            guard let dictionary = snapshot.value as? [String : AnyObject]
-                else{
-                    return
-            }
-            let user = User(values: dictionary)
-            user.id = snapshot.key
-            self.showChatControllerForUser(user: user)
-            
-        }, withCancel: nil)
+        self.switchToChatLogController(user: user)
     }
     
-    func showChatControllerForUser(user: User){
-        let chatLogController = SingleChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
-        chatLogController.user = user
-        chatLogController.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(chatLogController, animated: true)
+    func switchToChatLogController(user: User) {
+        let userChatLogController = UserChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
+        userChatLogController.recipient = user
+        userChatLogController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(userChatLogController, animated: true)
     }
     
+    //Procesing 10.(4).3
+    private func switchToPersonalController(user: User) {
+        let persionalPageController = PersionalPageViewController(collectionViewLayout: UICollectionViewFlowLayout())
+        persionalPageController.hidesBottomBarWhenPushed = true
+        persionalPageController.user = user
+        navigationController?.pushViewController(persionalPageController, animated: true)
+    }
+    
+    //MARK: - TABLEVIEW DELEGATE AND DATASOURCE
     override func numberOfSections(in tableView: UITableView) -> Int {
         return letters.count
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let friends = friendsContact[letters[section]]
-        
         return friends!.count
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: friendCellId, for: indexPath) as! FriendCell
-        cell.friendsVC = self
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let user = friendsContact[letters[indexPath.section]]![indexPath.row]
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: FriendsViewController.identifier,
+                                                 for: indexPath) as! FriendCell
+        cell.friendsVC = self
         cell.textLabel?.text = user.name
-        
         cell.btnCall.isEnabled = user.phoneNumber == nil ? false : true
-        
-        if let profileImageUrl = user.profileImageUrl{
+        if let profileImageUrl = user.profileImageUrl {
             cell.profileImageView.loadImageUsingCacheWithUrlString(urlString: profileImageUrl)
         }
-        
         return cell
     }
     
@@ -229,15 +185,10 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
         return 72
     }
     
-    var messagesController = RecentMessagesController()
-    
+    //Procesing 10.(4).3
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let user = friendsContact[letters[indexPath.section]]![indexPath.row]
-        let persionnalPageController = PersionalPageViewController(collectionViewLayout: UICollectionViewFlowLayout())
-        
-        persionnalPageController.hidesBottomBarWhenPushed = true
-        persionnalPageController.user = user
-        navigationController?.pushViewController(persionnalPageController, animated: true)
+        switchToPersonalController(user: user)
     }
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -249,14 +200,11 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
         label.text = String(letters[section])
         label.textColor = UIColor.lightGray
         label.textAlignment = .left
-
-        
+     
         view.addSubview(label)
         label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         label.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 8).isActive = true
-        
-        
-        
+
         return view
     }
     
@@ -273,6 +221,38 @@ class FriendsViewController: BaseTableViewController, UISearchBarDelegate {
 
 }
 
+//MARK: - FETCH ALL USER DATA DELEGATE
+extension FriendsViewController: FetchAllUserData {
+    func dataReceived(users: [User]) {
+        self.friends = users
+        self.usersFillter = users
+        attemptReloadOfTable()
+    }
+}
+//MARK: - SEARCH BAR DELEGATE
+extension FriendsViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        friends.removeAll()
+        guard !searchText.isEmpty else {
+            friends = usersFillter
+            handleReloadTable()
+            return
+        }
+        friends = usersFillter.filter({ (user) -> Bool in
+            (user.name?.lowercased().contains(searchText.lowercased()))!
+        })
+        
+        handleReloadTable()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        setupNavBarWithUser()
+        setupBarButtonItem()
+        friends = usersFillter
+        handleReloadTable()
+    }
+
+}
 
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertToUIApplicationOpenExternalURLOptionsKeyDictionary(_ input: [String: Any]) -> [UIApplication.OpenExternalURLOptionsKey: Any] {

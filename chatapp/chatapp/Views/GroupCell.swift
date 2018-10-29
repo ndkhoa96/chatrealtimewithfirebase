@@ -16,9 +16,6 @@ class GroupCell: UserCell{
         self.detailTextLabel?.font = UIFont.systemFont(ofSize: 14)
         self.detailTextLabel?.textColor = UIColor.darkGray
         
-//        if let messText = message?.text{
-//            self.detailTextLabel?.text = messText
-//        }
         var name: String?
         var mess: String?
         
@@ -29,11 +26,11 @@ class GroupCell: UserCell{
         }
         
         if let id = message?.fromID{
-            if id == AuthProvider.shared.userID {
+            if id == AuthProvider.shared.currentUserID {
                 name = "You"
                 self.detailTextLabel?.text = name! + mess!
             }else{
-                DBProvider.shared.users.child(id).observeSingleEvent(of: .value, with: { (snapshot) in
+                DBProvider.shared.usersReference.child(id).observeSingleEvent(of: .value, with: { (snapshot) in
                     if let dic = snapshot.value as? [String: AnyObject]
                     {
                         name = dic[KEY_DATA.USER.NAME] as? String

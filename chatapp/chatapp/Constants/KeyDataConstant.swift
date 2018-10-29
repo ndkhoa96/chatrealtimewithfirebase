@@ -68,7 +68,6 @@ struct KEY_DATA {
         static let MESSAGE_VIDEOS = "message_videos"
         static let PROFILE_IMAGES = "profile_images"
         static let USER_IMAGES = "user_images"
-
     }
 }
 

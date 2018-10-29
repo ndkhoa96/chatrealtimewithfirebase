@@ -19,6 +19,3 @@ struct ANIMATION {
     
 }
 
-struct TIME {
-    static let REFRESH = 0.1
-}

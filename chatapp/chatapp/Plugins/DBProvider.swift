@@ -6,97 +6,183 @@
 //  Copyright © 2018 KhoaNguyen. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import FirebaseDatabase
-import FirebaseStorage
 
-@objc protocol FetchUsersData: class {
-    @objc optional func getCurrentUser(user: User)
-    @objc optional func getAllUser(users: [User])
+protocol FetchAllUserData: class {
+    func dataReceived(users: [User])
 }
 
 class DBProvider {
-
-    class var shared: DBProvider {
-        struct Static {
-            static var instance = DBProvider()
-        }
-        return Static.instance
-    }
+    //MARk: - SHARE INSTANCE
+    static let shared = DBProvider()
     
-    weak var delegate: FetchUsersData?
+    //MARK: - INIT
+    private init(){}
     
-    private init(){
-    }
+    //MARK: - PROPERTIES
+    weak var delegateAllUser: FetchAllUserData?
     
-    
-    //MARK: DATABASE
+    //MARK: - REFERENCE DATABASE PROPERTIES
     var reference: DatabaseReference {
         return Database.database().reference()
     }
     
-    var users: DatabaseReference {
+    var usersReference: DatabaseReference {
         return reference.child(KEY_DATA.USER.ROOT)
     }
     
-    var messages: DatabaseReference {
+    var messagesReference: DatabaseReference {
         return reference.child(KEY_DATA.MESSAGE.ROOT)
     }
     
-    var groups: DatabaseReference {
+    var groupsReference: DatabaseReference {
         return reference.child(KEY_DATA.GROUP.ROOT)
     }
     
-    var user_messages: DatabaseReference {
+    var userMessagesReference: DatabaseReference {
         return reference.child(KEY_DATA.USER_MESSAGES.ROOT)
     }
     
-    var user_images: DatabaseReference {
+    var userImagesReference: DatabaseReference {
         return reference.child(KEY_DATA.USER_IMAGES.ROOT)
     }
     
-    var user_groups: DatabaseReference {
+    var userGroupsReference: DatabaseReference {
         return reference.child(KEY_DATA.USER_GROUPS.ROOT)
     }
     
-    var group_members: DatabaseReference {
+    var groupMembersReference: DatabaseReference {
         return reference.child(KEY_DATA.GROUP_MEMBERS.ROOT)
     }
     
-    var group_messages: DatabaseReference {
+    var groupMessagesReference: DatabaseReference {
         return reference.child(KEY_DATA.GROUP_MESSAGES.ROOT)
     }
-
-    func getCurrentUser(){
-        
-        let uid = AuthProvider.shared.userID
-        print("uid: ", uid)
-        DBProvider.shared.users.child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+    
+    //MARK: GET USER DATA WITH ID
+    func getUserWith(id: String, completion: @escaping (_ user: User?) -> ()) {
+        usersReference.child(id).observeSingleEvent(of: .value, with: { (snapshot) in
             if let dictionary = snapshot.value as? [String: AnyObject]{
-                
                 let user = User(values: dictionary)
                 user.id = snapshot.key
-                self.delegate?.getCurrentUser!(user: user)
-                
+                completion(user)
             }
-            
         }, withCancel: nil)
+    }
+    
+    //MARK: GET ALL USER DATA
+    func getAllUser() {
+        guard let uid =  AuthProvider.shared.currentUserID else { return }
+        var usersData = [User]()
         
-//        usersRef.observeSingleEvent(of: DataEventType.value){
-//            (snapshot: DataSnapshot) in
-//            if let myContacts = snapshot.value as? NSDictionary{
-//                for(key,value) in myContacts{
-//                    if let contactData = value as? NSDictionary{
-//                        if let email = contactData[Constants.EMAIL] as? String {
-//                                let id = key as! String
-//                                let newContact = Contact(id: id, email: email)
-//                                contacts.append(newContact)
-//
-//                        }
-//                    }
-//                }
-//            }
-//            self.delegate?.dataReceived(users: contacts)
-//        }
-   }
+        usersReference.queryOrdered(byChild: KEY_DATA.USER.NAME).observe(.childAdded, with: { (snapshot) in
+            if let dictionary = snapshot.value as? [String: AnyObject] {
+                let user = User(values: dictionary)
+                user.id = snapshot.key
+                
+                if uid != user.id{
+                    usersData.append(user)
+                }
+                
+                self.delegateAllUser?.dataReceived(users: usersData)
+            }
+        }, withCancel: nil)
+    }
+    
+    //MARK: HANDLE GROUP CHAT FUNCTION
+    //Create Group
+    func createGroupWith(name: String, image: UIImage, completion: @escaping (_ error: Error?) -> ()) {
+        guard let uid = AuthProvider.shared.currentUserID else { return }
+        let storageRef = StorageProvider.shared.groupsImagesReference.child("\(name)\(CONSTANT.IMAGE.TYPE)")
+        if let uploadData = image.jpegData(compressionQuality: 0.1) {
+            storageRef.putData(uploadData, metadata: nil, completion: { (metaData, error) in
+                if error != nil{
+                    completion(error)
+                    return
+                }
+                if let groupImageUrl = metaData?.downloadURL()?.absoluteString {
+                    let values = [KEY_DATA.USER.NAME: name, KEY_DATA.GROUP.GROUP_IMAGE_URL: groupImageUrl, KEY_DATA.GROUP.HOST_ID: uid]
+                    let dbRefGroup = self.groupsReference.childByAutoId()
+                    let keyAutoId = dbRefGroup.key
+                    
+                    dbRefGroup.updateChildValues(values, withCompletionBlock: { (err, ref) in
+                        if err != nil {
+                            completion(err)
+                            return
+                        }
+                        self.updateUserGroupAndGroupMember(childId: uid, idGroup: keyAutoId, nameGroup: name)
+                        completion(nil)
+                    })
+                }
+            })
+        }
+    }
+    
+    private func updateUserGroupAndGroupMember(childId: String, idGroup: String, nameGroup: String) {
+        let role = "admin"
+        userGroupsReference.child(childId).updateChildValues([idGroup: role])
+        groupMembersReference.child(idGroup).updateChildValues([childId: role])
+        putSomeDataWhenFirstCreateGroup(childId: childId, idGroup: idGroup, nameGroup: nameGroup)
+    }
+    
+    private func putSomeDataWhenFirstCreateGroup(childId: String, idGroup: String, nameGroup: String) {
+        let dbRef = DBProvider.shared.messagesReference
+        let childRef = dbRef.childByAutoId()
+        let timeStamp = Int(NSDate().timeIntervalSince1970)
+        let values = [KEY_DATA.MESSAGE.FROM_ID: childId,KEY_DATA.MESSAGE.TO_ID: idGroup , KEY_DATA.MESSAGE.TIME_STAMP: timeStamp, KEY_DATA.MESSAGE.TEXT: "Create the group - \(nameGroup)"] as [String: AnyObject]
+        
+        childRef.updateChildValues(values) { (error, dbRef) in
+            if error != nil{
+                print(error!)
+                return
+            }
+            let messagesId = childRef.key
+            let groupMessagesRef = DBProvider.shared.groupMessagesReference.child(idGroup)
+            groupMessagesRef.updateChildValues([messagesId: 1])
+            
+        }
+    }
+    
+    //Leave Group
+    func userLeaveGroup(groupID: String, completion: @escaping (_ error: Error?) -> ()) {
+        guard let uid = AuthProvider.shared.currentUserID else { return }
+        groupMembersReference.child(groupID).child(uid).removeValue { (error, ref) in
+            if error != nil {
+                completion(error)
+                return
+            }
+            self.userGroupsReference.child(uid).child(groupID).removeValue{ (error, ref) in
+                if error != nil {
+                    completion(error)
+                    return
+                }
+                completion(nil)
+            }
+        }
+    }
+    
+    //Delete Group
+    func deleteGroup(groupID: String, completion: @escaping (_ error: Error?) -> ()) {
+        groupMembersReference.child(groupID).observe(.childAdded, with: { (snapshot) in        self.userGroupsReference.child(snapshot.key).child(groupID).removeValue{ (error, ref) in
+                if error != nil {
+                    completion(error)
+                    return
+                }
+            }
+            self.groupsReference.child(groupID).removeValue { (error, ref) in
+                if error != nil {
+                    completion(error)
+                    return
+                }
+                self.groupMembersReference.child(groupID).removeValue { (error, ref) in
+                    if error != nil {
+                        completion(error)
+                        return
+                    }
+                    completion(nil)
+                }
+            }
+        }, withCancel: nil)
+    }
 }

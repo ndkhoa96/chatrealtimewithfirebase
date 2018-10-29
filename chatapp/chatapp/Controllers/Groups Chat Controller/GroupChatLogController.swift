@@ -7,126 +7,142 @@
 //
 
 import UIKit
-import Firebase
-import AVFoundation
 
 class GroupChatLogController: BaseChatLogController {
     
-    var group: Group? {
+    //MARK: - CONSTANT
+    struct Constants {
+        static let outGroupTitle = "Sorry"
+        static let outGroupMessage = "You are blocked from this group!"
+        static let okActionTitle = "Ok"
+    }
+    
+    //MARK: - PROPERTIES
+    var groupChat: Group? {
         didSet {
-            navigationItem.title = group?.name
-            observeMessages()
- 
+            navigationItem.title = groupChat?.name
+            if let groupId = groupChat?.id {
+                MessagesHandler.shared.observeGroupMessages(groupId: groupId)
+            }
         }
     }
-
-    
     var groupMessages = [Message]()
+    private var timer: Timer?
     
-    func observeMessages(){
-        guard let groupId = group?.id
-            else{
-                return
-        }
-        
-        let dbRef = Database.database().reference().child(KEY_DATA.GROUP_MESSAGES.ROOT).child(groupId)
-        dbRef.observe(.childAdded, with: { (snapshot) in
-            let messageId = snapshot.key
-            let messageRef = Database.database().reference().child(KEY_DATA.MESSAGE.ROOT).child(messageId)
-            messageRef.observeSingleEvent(of: .value, with: { (snapshot) in
-                guard let dictionary = snapshot.value as? [String : AnyObject]
-                    else{
-                        return
-                }
-                let message = Message(values: dictionary)
-                
-                self.groupMessages.append(message)
-                DispatchQueue.main.async {
-                    self.collectionView?.reloadData()
-                    if self.groupMessages.count > 0{
-                        let indexPath = IndexPath(item: self.groupMessages.count - 1, section: 0)
-                        self.collectionView?.scrollToItem(at: indexPath , at: .bottom, animated: true)
-                    }
-                }
-     
-            }, withCancel: nil)
-        }, withCancel: nil)
-        
-    }
-    
+    //MARK: - VIEW LOAD
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: ASSETS.ICON.SETTING), style: .plain, target: self, action: #selector(handleAddMember))
-
-        setupKeyboardObservers() 
-        inputAccessoryView?.becomeFirstResponder()
-
-        DBProvider.shared.group_members.child((group?.id)!).observe(.childRemoved, with: { (snapshot) in
-            print("Remove from Group key = ", snapshot.key)
-            self.showNotificationWhenOutGroup()
-            
-        }, withCancel: nil)
+        setupBarButtonItem()
+        setDelegateAndRegister()
+        observeChildRemoveGroup()
     }
     
-    func showNotificationWhenOutGroup(){
-        
-        let alert = UIAlertController(title: "Sorry", message: "You are blocked from this group!", preferredStyle: .alert)
-        let action = UIAlertAction(title: "Ok", style: .default) { (alert) in
+    //MARK: SET DELEGATE AND REGISTER
+    private func setDelegateAndRegister() {
+        MessagesHandler.shared.delegateGroupMessages = self
+    }
+    
+    //MARK: - SETUP UI
+    private func setupBarButtonItem() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: ASSETS.ICON.SETTING),
+                                                            style: .plain,
+                                                            target: self,
+                                                            action: #selector(handleAddMember))
+    }
+    
+    //MARK: - OVERRIDE FUNCTION
+    @objc override func handleKeyboardDidShow() {
+        scrollToNewestMessage()
+    }
+    
+    override func sendMessageWithProperties(properties: [String: AnyObject]){
+        guard let groupId = self.groupChat?.id else { return }
+        MessagesHandler.shared.sendDirectGroupMessage(groupID: groupId, properties: properties) { (error) in
+            if error != nil {
+                print(error!.localizedDescription)
+                return
+            }
+            self.inputTextField.text = nil
+        }
+    }
+    
+    //MARK: - HANDLE FUNCTION
+    private func observeChildRemoveGroup() {
+        guard let groupId = groupChat?.id else { return }
+        MessagesHandler.shared.observeGroupMembersChildRemove(groupId: groupId) { (removeId) in
+            if removeId == AuthProvider.shared.currentUserID {
+                self.showNotificationWhenOutGroup()
+            }
+        }
+    }
+    
+    
+    private func showNotificationWhenOutGroup() {
+        let alert = UIAlertController(title: Constants.outGroupTitle, message: Constants.outGroupMessage, preferredStyle: .alert)
+        let action = UIAlertAction(title: Constants.okActionTitle, style: .default) { (alert) in
             self.navigationController?.popViewController(animated: true)
         }
         
         alert.addAction(action)
-        
         self.present(alert,animated: true)
-        
     }
     
-    func setupKeyboardObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardDidShow), name: UIResponder.keyboardDidShowNotification, object: nil)
-        
-    }
-    
-    @objc func handleAddMember(){   
-        if group?.hostId == AuthProvider.shared.userID {
-            let managerMemberController = ManagerMemberController()
-            managerMemberController.group = self.group
-            let navController = UINavigationController(rootViewController: managerMemberController)
-            
-            present(navController, animated: true, completion: nil)
-        }
-        else{
-            let membersController = MembersController()
-            membersController.group = self.group
-            let navController = UINavigationController(rootViewController: membersController)
-            
-            present(navController, animated: true, completion: nil)
-        }
-    }
-    
-    @objc func handleKeyboardDidShow(notification: Notification) {
-        
+    private func scrollToNewestMessage() {
         if self.groupMessages.count > 0 {
             let indexPath = IndexPath(item: self.groupMessages.count - 1, section: 0)
-            self.collectionView?.scrollToItem(at: indexPath , at: .bottom, animated: true)
+            self.collectionView.scrollToItemIfAvailable(at: indexPath, at: .bottom, animated: true)
         }
     }
-
     
+    private func attemptReloadOfTable() {
+        self.timer?.invalidate()
+        self.timer = Timer.scheduledTimer(timeInterval: CONSTANT.TIME.REFRESH,
+                                          target: self,
+                                          selector: #selector(self.handleReloadMessages),
+                                          userInfo: nil, repeats: false)
+    }
+    
+    @objc private func handleReloadMessages() {
+        DispatchQueue.main.async {
+            self.collectionView?.reloadData()
+            self.scrollToNewestMessage()
+        }
+    }
+    
+    @objc func handleAddMember() {
+        if groupChat?.hostId == AuthProvider.shared.currentUserID {
+            switchToManagerMemberController()
+        } else {
+            switchToMemberController()
+        }
+    }
+    
+    private func switchToManagerMemberController() {
+        let managerMemberController = ManagerMemberController()
+        managerMemberController.group = self.groupChat
+        let navController = UINavigationController(rootViewController: managerMemberController)
+        present(navController, animated: true, completion: nil)
+    }
+    
+    private func switchToMemberController() {
+        let membersController = MembersController()
+        membersController.group = self.groupChat
+        let navController = UINavigationController(rootViewController: membersController)
+        present(navController, animated: true, completion: nil)
+    }
+
+    //MARK: - COLLECTIONVIEW DELEGATE
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return groupMessages.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
-        
-        cell.chatLogController = self
-        
         let message = groupMessages[indexPath.row]
-
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BaseChatLogController.identifier,
+                                                      for: indexPath) as! ChatMessageCell
+        cell.chatLogController = self
         cell.messages = message
         cell.textView.text = message.text
-
         setupCell(cell: cell, message: message)
         
         if let text = message.text {
@@ -137,135 +153,29 @@ class GroupChatLogController: BaseChatLogController {
             cell.textView.isHidden = true
         }
         cell.playButton.isHidden = message.videoUrl == nil
-        
         return cell
     }
     
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         var height:CGFloat = 80
-        
         let message = groupMessages[indexPath.row]
         if let text = message.text {
             height = estimateFrameForText(text: text).height + 20
         } else if let imageWidth = message.imageWidth?.floatValue, let imageHeight = message.imageHeight?.floatValue {
             height = CGFloat(imageHeight / imageWidth * 200)
         }
-        
         let width = UIScreen.main.bounds.width
         return CGSize(width: width, height: height)
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        
-//        if let videoUrl = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.mediaURL)] as? URL{
-//            handleImageSelectedForUrl(url: videoUrl)
-//
-//        }else {
-//            handleImageSelectedForInfo(info: info)
-//        }
-//        dismiss(animated: true, completion: nil)
-        
-        
-    }
-    
-//    func handleImageSelectedForUrl(url: URL){
-//        let fileName = NSUUID().uuidString + ".mov"
-//
-//        let uploadTask = StorageProvider.shared.messages_videos.child(fileName).putFile(from: url, metadata: nil) { (metadata, error) in
-//            if error != nil {
-//                print("Fail to upload of video: ", error!)
-//            }
-//
-//            if let videoUrl = metadata?.downloadURL()?.absoluteString{
-//                if let thumnailImage = self.getThumbnailImageForVideoUrl(fileUrl: url){
-//                    print("thumnailImage width = \(thumnailImage.size.width)")
-//                    print("thumnailImage height = \(thumnailImage.size.height)")
-//                    self.uploadToFireBaseStoragesUsingImage(image: thumnailImage, completion: { (imageUrl) in
-//                        let properties = [KEY_DATA.MESSAGE.IMAGE_URL: imageUrl, KEY_DATA.MESSAGE.IMAGE_WIDTH: thumnailImage.size.width, KEY_DATA.MESSAGE.IMAGE_HEIGHT: thumnailImage.size.height, KEY_DATA.MESSAGE.VIDEO_URL: videoUrl] as [String: AnyObject]
-//                        self.sendMessageWithProperties(properties: properties)
-//
-//                    })
-//                }
-//            }
-//        }
-    
-//        uploadTask.observe(.progress) { (snapshot) in
-//            print(snapshot.progress?.completedUnitCount as Any)
-//        }
-//    }
+}
 
-//    func handleImageSelectedForInfo(info: [String: Any]){
-//        var selectedImageFromPicker: UIImage?
-//
-//        if let editedImage = info[KEY_INFO.IMAGE.EDIT] as? UIImage{
-//            selectedImageFromPicker = editedImage
-//        }else if let originalImage = info[KEY_INFO.IMAGE.ORIGIN] as? UIImage{
-//            selectedImageFromPicker = originalImage
-//        }
-//
-//        if let selectedImage = selectedImageFromPicker{
-//            uploadToFireBaseStoragesUsingImage(image: selectedImage) { (imageUrl) in
-//                self.sendMessageWithImageUrl(imageUrl: imageUrl, image: selectedImage)
-//            }
-//
-//        }
-//    }
-
-    
-//    override func handleSend(){
-//        if inputTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
-//            return
-//        }
-//        
-//        let properties = [KEY_DATA.MESSAGE.TEXT: inputTextField.text!] as [String: AnyObject]
-//        
-//        sendMessageWithProperties(properties: properties)
-//
-//    }
-    
-//    func sendMessageWithImageUrl(imageUrl: String, image: UIImage){
-//
-//        let properties = [KEY_DATA.MESSAGE.IMAGE_URL: imageUrl, KEY_DATA.MESSAGE.IMAGE_WIDTH: image.size.width, KEY_DATA.MESSAGE.IMAGE_HEIGHT: image.size.height] as [String: AnyObject]
-//
-//        sendMessageWithProperties(properties: properties)
-//
-//    }
-    
-    override func sendMessageWithProperties(properties: [String: AnyObject]){
-        let dbRef = DBProvider.shared.messages
-        let childRef = dbRef.childByAutoId()
-        let fromID = AuthProvider.shared.userID
-        let toID = group?.id
-        let timeStamp = Int(NSDate().timeIntervalSince1970)
-        
-        var values = [KEY_DATA.MESSAGE.FROM_ID: fromID,KEY_DATA.MESSAGE.TO_ID: toID! , KEY_DATA.MESSAGE.TIME_STAMP: timeStamp] as [String: AnyObject]
-        
-        //append properties dictionary onto values
-        //key $0 value $1
-        properties.forEach({values[$0.0] = $0.1})
-        
-        childRef.updateChildValues(values) { (error, dbRef) in
-            if error != nil{
-                print(error!)
-                return
-            }
-            
-            self.inputTextField.text = nil
-            if self.groupMessages.count > 0 {
-                let indexPath = IndexPath(item: self.groupMessages.count - 1, section: 0)
-                self.collectionView?.scrollToItem(at: indexPath , at: .bottom, animated: true)
-            }
-            let messagesId = childRef.key
-            let groupMessagesRef = Database.database().reference().child(KEY_DATA.GROUP_MESSAGES.ROOT).child(toID!)
-            groupMessagesRef.updateChildValues([messagesId: 1])
-            
-            
-        }
-        
+//MARK: - FETCH GROUP MESSAGES DELEGATE
+extension GroupChatLogController: FetchGroupMessages {
+    func dataReceived(groupMessages: [Message]) {
+        self.groupMessages = groupMessages
+        attemptReloadOfTable()
     }
-    
-    
 }
 
 // Helper function inserted by Swift 4.2 migrator.

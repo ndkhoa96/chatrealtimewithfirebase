@@ -10,7 +10,6 @@ import UIKit
 
 
 struct ASSETS {
-    
     struct ICON {
         static let SETTING = "group_setting"
         static let GROUP = "groups"
@@ -24,7 +23,7 @@ struct ASSETS {
         static let CANCEL = "ic_drop"
         static let EDIT = "ic_edit"
         static let FEMALE = "ic_female"
-        static let CONTACT = "ic_friend"
+        static let CONTACT = "ic_friends"
         static let GENDER = "ic_gender"
         static let INFO = "ic_infor"
         static let LOGOUT = "ic_logout"
@@ -54,7 +53,7 @@ struct ASSETS {
     struct IMAGE {
         static let BACKGROUND = "bg2"
         static let LOGO = "logo"
-
         
     }
+    
 }

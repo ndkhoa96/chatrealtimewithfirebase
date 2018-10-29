@@ -114,10 +114,6 @@ class ChatMessageCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-//        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem, queue: .main) { (_) in
-//            self.player?.seek(to: kCMTimeZero)
-//            self.player?.play()
-//        }
         NotificationCenter.default.addObserver(self, selector: #selector(didPlayToEnd), name: .AVPlayerItemDidPlayToEndTime, object: nil)
 
         addSubview(bubbleView)
@@ -163,9 +159,7 @@ class ChatMessageCell: UICollectionViewCell {
         profileImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         profileImageView.widthAnchor.constraint(equalToConstant: 32).isActive = true
         profileImageView.heightAnchor.constraint(equalToConstant: 32).isActive = true
-        
-        
-        
+ 
     }
     
     required init?(coder aDecoder: NSCoder) {

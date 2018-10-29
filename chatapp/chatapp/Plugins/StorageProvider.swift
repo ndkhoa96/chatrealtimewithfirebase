@@ -7,19 +7,11 @@
 //
 
 import Foundation
-import FirebaseDatabase
 import FirebaseStorage
-
 
 class StorageProvider {
     
-    class var shared: StorageProvider {
-        struct Static {
-            static var instance = StorageProvider()
-        }
-        return Static.instance
-    }
-    //weak var delegate: FetchData?
+    static let shared = StorageProvider()
     
     private init(){
     }
@@ -29,27 +21,27 @@ class StorageProvider {
         return Storage.storage().reference()
     }
     
-    var groups_images: StorageReference {
+    var groupsImagesReference: StorageReference {
         return reference.child(KEY_DATA.STORAGE.GROUP_IMAGES)
     }
     
-    var background_images: StorageReference {
+    var backgroundImagesReference: StorageReference {
         return reference.child(KEY_DATA.STORAGE.BACKGROUND_IMAGES)
     }
     
-    var messages_videos: StorageReference {
+    var messagesVideosReference: StorageReference {
         return reference.child(KEY_DATA.STORAGE.MESSAGE_VIDEOS)
     }
     
-    var messages_images: StorageReference {
+    var messagesImagesReference: StorageReference {
         return reference.child(KEY_DATA.STORAGE.MESSAGE_IMAGES)
     }
     
-    var profile_images: StorageReference {
+    var profileImagesReference: StorageReference {
         return reference.child(KEY_DATA.STORAGE.PROFILE_IMAGES)
     }
     
-    var user_images: StorageReference {
+    var userImagesReference: StorageReference {
         return reference.child(KEY_DATA.STORAGE.USER_IMAGES)
     }
    
