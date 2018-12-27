@@ -151,6 +151,7 @@ class GroupsMessagesController: BaseTableViewController {
         super.viewDidLoad()
         setDelegateAndRegister()
         MessagesHandler.shared.observeUserGroups()
+        print("view did load group messages")
     }
     
     //MARK: SET DELEGATE AND REGISTER

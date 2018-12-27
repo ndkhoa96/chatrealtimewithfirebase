@@ -28,6 +28,8 @@
 		6E7EF4F32165EFCA00643942 /* AnimationConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7EF4F22165EFCA00643942 /* AnimationConstant.swift */; };
 		6E7EF4F5216607AA00643942 /* OtherConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7EF4F4216607AA00643942 /* OtherConstant.swift */; };
 		6E7EF4F72166235A00643942 /* GallaryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7EF4F62166235A00643942 /* GallaryPicker.swift */; };
+		6E7F92462187087200C25510 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7F92452187087200C25510 /* MainViewController.swift */; };
+		6E7F92482187092800C25510 /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7F92472187092800C25510 /* CollectionViewCell.swift */; };
 		6E7FDF4420D8F9F4009AB0B3 /* GroupsMessagesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7FDF4320D8F9F4009AB0B3 /* GroupsMessagesController.swift */; };
 		6E828213205A1BC70092D70C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E828212205A1BC70092D70C /* AppDelegate.swift */; };
 		6E828215205A1BC70092D70C /* UserMessagesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E828214205A1BC70092D70C /* UserMessagesController.swift */; };
@@ -52,6 +54,7 @@
 		6EE37DE2205A1F5D0056FFEB /* LoginAndRegisterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE37DE1205A1F5D0056FFEB /* LoginAndRegisterController.swift */; };
 		6EF1E054215DD718008A1DD0 /* AssetConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF1E053215DD718008A1DD0 /* AssetConstant.swift */; };
 		6EF2162A20D60CB7006DB122 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF2162920D60CB7006DB122 /* Group.swift */; };
+		6EFA345021BF689D00A7C6D2 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EFA344F21BF689D00A7C6D2 /* StoreKit.framework */; };
 		B0D761C488EC953D1666640E /* Pods_chatapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AE164F8FB5E372F262004C0 /* Pods_chatapp.framework */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +80,8 @@
 		6E7EF4F22165EFCA00643942 /* AnimationConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationConstant.swift; sourceTree = "<group>"; };
 		6E7EF4F4216607AA00643942 /* OtherConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherConstant.swift; sourceTree = "<group>"; };
 		6E7EF4F62166235A00643942 /* GallaryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GallaryPicker.swift; sourceTree = "<group>"; };
+		6E7F92452187087200C25510 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		6E7F92472187092800C25510 /* CollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
 		6E7FDF4320D8F9F4009AB0B3 /* GroupsMessagesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsMessagesController.swift; sourceTree = "<group>"; };
 		6E82820F205A1BC70092D70C /* chatapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = chatapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E828212205A1BC70092D70C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -104,6 +109,7 @@
 		6EE37DE1205A1F5D0056FFEB /* LoginAndRegisterController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginAndRegisterController.swift; sourceTree = "<group>"; };
 		6EF1E053215DD718008A1DD0 /* AssetConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetConstant.swift; sourceTree = "<group>"; };
 		6EF2162920D60CB7006DB122 /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		6EFA344F21BF689D00A7C6D2 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		872A922A246DBF2738310EE6 /* Pods-chatapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatapp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-chatapp/Pods-chatapp.debug.xcconfig"; sourceTree = "<group>"; };
 		8AE164F8FB5E372F262004C0 /* Pods_chatapp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_chatapp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2564B90A809CD712CE0F73C /* Pods-chatapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-chatapp.release.xcconfig"; path = "Pods/Target Support Files/Pods-chatapp/Pods-chatapp.release.xcconfig"; sourceTree = "<group>"; };
@@ -115,6 +121,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0D761C488EC953D1666640E /* Pods_chatapp.framework in Frameworks */,
+				6EFA345021BF689D00A7C6D2 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +131,7 @@
 		1FD646C12CDC3541DF3EFFFE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6EFA344F21BF689D00A7C6D2 /* StoreKit.framework */,
 				8AE164F8FB5E372F262004C0 /* Pods_chatapp.framework */,
 			);
 			name = Frameworks;
@@ -349,6 +357,8 @@
 		6EE37DE0205A1F5D0056FFEB /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				6E7F92452187087200C25510 /* MainViewController.swift */,
+				6E7F92472187092800C25510 /* CollectionViewCell.swift */,
 				6E1AB8DD215CB3AD00BD3517 /* Base Controller */,
 				6E52037221674B0A0087B672 /* Custom Controller */,
 				6E52036F216745850087B672 /* Direction Message Controller */,
@@ -408,8 +418,11 @@
 						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
-							com.apple.Keychain = {
+							com.apple.InAppPurchase = {
 								enabled = 1;
+							};
+							com.apple.Keychain = {
+								enabled = 0;
 							};
 						};
 					};
@@ -512,6 +525,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6E30EC9820F70E5A009EF176 /* PhotoCell.swift in Sources */,
+				6E7F92462187087200C25510 /* MainViewController.swift in Sources */,
 				6EA4675D20638B8000313E08 /* UserChatLogController.swift in Sources */,
 				6E87E2B3216A426000193CC5 /* AlertMessage.swift in Sources */,
 				6E7FDF4420D8F9F4009AB0B3 /* GroupsMessagesController.swift in Sources */,
@@ -520,6 +534,7 @@
 				6EDEAD5320E49EB500D91A50 /* MembersController.swift in Sources */,
 				6EA887D9210036890003C955 /* FriendCell.swift in Sources */,
 				6E828215205A1BC70092D70C /* UserMessagesController.swift in Sources */,
+				6E7F92482187092800C25510 /* CollectionViewCell.swift in Sources */,
 				6ECB703420EC87920074892D /* PersionalPageViewController.swift in Sources */,
 				6EF1E054215DD718008A1DD0 /* AssetConstant.swift in Sources */,
 				6ED7FCCF209377A200916AF6 /* CustomTabBarController.swift in Sources */,
@@ -686,13 +701,12 @@
 			baseConfigurationReference = 872A922A246DBF2738310EE6 /* Pods-chatapp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = chatapp/chatapp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = W2M2R9463E;
+				DEVELOPMENT_TEAM = 9Q8Z428NW5;
 				INFOPLIST_FILE = "$(SRCROOT)/chatapp/Resource/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.khoanguyen.mychatapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iuyu.chatapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -704,13 +718,12 @@
 			baseConfigurationReference = C2564B90A809CD712CE0F73C /* Pods-chatapp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = chatapp/chatapp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = W2M2R9463E;
+				DEVELOPMENT_TEAM = 9Q8Z428NW5;
 				INFOPLIST_FILE = "$(SRCROOT)/chatapp/Resource/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.khoanguyen.mychatapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iuyu.chatapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";

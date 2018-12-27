@@ -17,7 +17,7 @@ class BaseTableViewController: UITableViewController {
         static let menuSettingBtnTitle = "Setting"
         static let menuSignoutBtnTitle = "Sign Out"
     }
-    
+
     //MARK: - PROPERTIES
     var user : User? {
         didSet{
@@ -185,7 +185,7 @@ class BaseTableViewController: UITableViewController {
         navProfileImageView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
         navProfileImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
         navProfileImageView.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        navProfileImageView.heightAnchor.constraint(equalToConstant: 40).isActive = true   
+        navProfileImageView.heightAnchor.constraint(equalToConstant: 40).isActive = true
     }
     
     private func setupNavNameLabel() {
@@ -343,7 +343,7 @@ class BaseTableViewController: UITableViewController {
     }
     
     private func setupMenuView() {
-        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.extraLight)   
+        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.extraLight)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = view.bounds
         blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -363,7 +363,7 @@ class BaseTableViewController: UITableViewController {
     }
     
     //MARK: - HANDLE FUNCTION
-    //Procesing 10.(1).1
+
     func checkIfUserIsLogIn() {
         if AuthProvider.shared.isLoggedIn {
             guard let myId = AuthProvider.shared.currentUserID else { return }
@@ -413,7 +413,6 @@ class BaseTableViewController: UITableViewController {
         }
     }
     
-    //Procesing 10.(5).1
     @objc func handleShowMenu() {
         grayView.frame = (window?.frame)!
         grayView.addSubview(menuView)
@@ -425,7 +424,7 @@ class BaseTableViewController: UITableViewController {
         
         menuView.slideInFromLeft(duration: ANIMATION.FAST)
 
-        UIView.transition(with: grayView, duration: ANIMATION.FAST, options: .curveEaseIn, animations: {   
+        UIView.transition(with: grayView, duration: ANIMATION.FAST, options: .curveEaseIn, animations: {
             self.grayView.alpha = 1
             self.menuView.alpha = 1
         }, completion: nil)

@@ -31,6 +31,7 @@ class UserMessagesController: BaseTableViewController {
         super.viewDidLoad()
         setDelegateAndRegister()
         MessagesHandler.shared.observeUserMessages()
+        print("view did load user messages")
     }
     
     //MARK: SET DELEGATE AND REGISTER

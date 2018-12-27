@@ -343,7 +343,7 @@ class PersionalPageViewController : UICollectionViewController, UICollectionView
                         return
                     }
                     print("File deleted successfully")
-                    
+
                     if let data = selectedImage.jpegData(compressionQuality: 0.1){
                         storageRef.putData(data, metadata: nil, completion: { (metadata, error) in
                             

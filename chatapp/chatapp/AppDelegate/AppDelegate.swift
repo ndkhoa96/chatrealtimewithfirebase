@@ -1,4 +1,4 @@
-    //
+//
 //  AppDelegate.swift
 //  chatapp
 //
@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().isTranslucent = true
         UINavigationBar.appearance().barTintColor = Theme.shared.secondaryColor
         UINavigationBar.appearance().tintColor = Theme.shared.whiteColor
-        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor:Theme.shared.whiteColor]
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: Theme.shared.whiteColor]
     }
     
     func setupTabBarAppearance() {

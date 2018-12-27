@@ -27,12 +27,12 @@ protocol FetchGroupMessages: class {
     func dataReceived(groupMessages: [Message])
 }
 
-class MessagesHandler {
+class MessagesHandler: NSObject {
     //MARK: - SHARE INSTANCE
     static let shared = MessagesHandler()
     
     //MARK: - INIT
-    private init(){
+    private override init(){
         
     }
     

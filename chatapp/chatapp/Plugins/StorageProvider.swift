@@ -9,11 +9,11 @@
 import Foundation
 import FirebaseStorage
 
-class StorageProvider {
+class StorageProvider: NSObject {
     
     static let shared = StorageProvider()
     
-    private init(){
+    private override init(){
     }
     
     //MARK: STORAGE

@@ -13,12 +13,12 @@ protocol FetchAllUserData: class {
     func dataReceived(users: [User])
 }
 
-class DBProvider {
+class DBProvider: NSObject {
     //MARk: - SHARE INSTANCE
     static let shared = DBProvider()
     
     //MARK: - INIT
-    private init(){}
+    private override init(){}
     
     //MARK: - PROPERTIES
     weak var delegateAllUser: FetchAllUserData?

@@ -9,13 +9,13 @@
 import Foundation
 import FirebaseAuth
 
-class AuthProvider{
+class AuthProvider: NSObject {
 
     //MARK: - SHARE INSTANCE
     static let shared = AuthProvider()
 
     //MARK: - INIT
-    private init(){
+    private override init(){
         
     }
     

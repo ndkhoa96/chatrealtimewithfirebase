@@ -23,24 +23,19 @@ class ChatMessageCell: UICollectionViewCell {
         let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
         button.setImage(tintedImage, for: .normal)
         button.tintColor = Theme.shared.whiteColor
-
         return button
     }()
     
 
     var videoPlayerView : VideoPlayerView?
     
-    @objc func handlePlayVideo(){
-
-        if let videoUrlString = messages?.videoUrl{
-            
+    @objc func handlePlayVideo() {
+        if let videoUrlString = messages?.videoUrl {
             videoPlayerView = VideoPlayerView(frame: bubbleView.bounds)
             videoPlayerView?.setupPlayerView(urlString: videoUrlString)
             bubbleView.addSubview(videoPlayerView!)
-
             print("Attemping to play video...")
         }
-        
     }
     
     override func prepareForReuse() {
@@ -57,7 +52,6 @@ class ChatMessageCell: UICollectionViewCell {
         textView.backgroundColor = UIColor.clear
         textView.textColor = Theme.shared.blackColor
         textView.isEditable = false
-        
         return textView
     }()
  
@@ -92,11 +86,10 @@ class ChatMessageCell: UICollectionViewCell {
         return imageView
     }()
     
-    @objc func handleZoomTap(tapGesture: UITapGestureRecognizer){
+    @objc func handleZoomTap(tapGesture: UITapGestureRecognizer) {
         if messages?.videoUrl != nil{
             return
         }
-        
         let imageView = tapGesture.view as? UIImageView
         self.chatLogController?.performZoomForImageView(startingImageView: imageView!)
     }
@@ -106,7 +99,7 @@ class ChatMessageCell: UICollectionViewCell {
     var bubbleViewRightAnchor:NSLayoutConstraint?
     var bubbleViewLeftAnchor:NSLayoutConstraint?
     
-    @objc func didPlayToEnd(){
+    @objc func didPlayToEnd() {
         print("end")
         videoPlayerView?.player?.seek(to: CMTimeMakeWithSeconds(0, preferredTimescale: 1))
         videoPlayerView?.removeFromSuperview()
